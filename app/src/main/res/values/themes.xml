@@ -1,9 +1,88 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.MyAndroidApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.MyAndroidApp" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/cw_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/cw_primary_soft</item>
+        <item name="android:colorBackground">@color/cw_bg</item>
+        <item name="android:windowBackground">@color/cw_bg</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:textColor">@color/cw_ink</item>
     </style>
 
     <style name="Theme.MyAndroidApp" parent="Base.Theme.MyAndroidApp" />
+
+    <!-- 아래 Cw.* 스타일들의 부모 -->
+    <style name="Cw" />
+
+    <!-- 카드 -->
+    <style name="Cw.Card">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">12dp</item>
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">18dp</item>
+    </style>
+
+    <style name="Cw.H2">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/cw_ink</item>
+    </style>
+
+    <style name="Cw.Label">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/cw_ink</item>
+    </style>
+
+    <style name="Cw.Body">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/cw_muted</item>
+        <item name="android:lineSpacingMultiplier">1.25</item>
+    </style>
+
+    <style name="Cw.Small">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/cw_muted</item>
+    </style>
+
+    <!-- 버튼: TextView 로 만들어 목업의 모양을 그대로 쓴다 -->
+    <style name="Cw.Btn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="Cw.Btn.Outline">
+        <item name="android:background">@drawable/btn_outline</item>
+        <item name="android:textColor">@color/cw_ink</item>
+    </style>
+
+    <style name="Cw.Btn.OutlinePrimary">
+        <item name="android:background">@drawable/btn_outline_primary</item>
+        <item name="android:textColor">@color/cw_primary</item>
+    </style>
+
+    <style name="Cw.Btn.Primary">
+        <item name="android:background">@drawable/btn_primary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Cw.Bar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">8dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@drawable/bg_track</item>
+    </style>
 </resources>

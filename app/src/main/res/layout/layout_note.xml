@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/note_box"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_note"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/note_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:textColor="@color/cw_primary_dark"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/note_close"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="안내 닫기"
+        android:gravity="center"
+        android:text="×"
+        android:textColor="@color/cw_primary_dark"
+        android:textSize="20sp" />
+</LinearLayout>

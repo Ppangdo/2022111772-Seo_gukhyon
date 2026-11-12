@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/tab_a" android:icon="@drawable/ic_tab_node" android:title="A 노드" />
+    <item android:id="@+id/tab_b" android:icon="@drawable/ic_tab_record" android:title="B 녹화" />
+    <item android:id="@+id/tab_c" android:icon="@drawable/ic_tab_list" android:title="C 목록" />
+    <item android:id="@+id/tab_d" android:icon="@drawable/ic_tab_test" android:title="D 테스트" />
+    <item android:id="@+id/tab_e" android:icon="@drawable/ic_tab_output" android:title="E 출력" />
+</menu>

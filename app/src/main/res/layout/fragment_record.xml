@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <include layout="@layout/layout_note" />
+
+        <TextView
+            android:id="@+id/editing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card"
+            android:padding="14dp"
+            android:textSize="14sp" />
+
+        <!-- 신체 모형 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                android:id="@+id/fig_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/readout"
+                style="@style/Cw.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
+
+            <com.example.myandroidapp.BodyView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="380dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="신체 모형" />
+
+            <LinearLayout
+                android:id="@+id/rec_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="녹화 중"
+                        android:textColor="@color/cw_rec"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/rec_pct"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/cw_rec"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/rec_bar"
+                    style="@style/Cw.Bar"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="6dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="100" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="녹화하는 동안 모형이 사용자의 움직임을 따라 움직입니다. 흐린 노드는 이 동작에서 보지 않는 노드입니다." />
+        </LinearLayout>
+
+        <!-- 녹화 설정 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                style="@style/Cw.H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="녹화 설정" />
+
+            <TextView
+                style="@style/Cw.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:labelFor="@id/rec_name"
+                android:text="동작 이름" />
+
+            <EditText
+                android:id="@+id/rec_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/btn_outline"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:minHeight="44dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:textSize="15sp" />
+
+            <TextView
+                style="@style/Cw.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="트리거 방식" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/type_pose"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:minHeight="64dp"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="포즈형"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="동작을 취하면 신호"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/type_fix"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:minHeight="64dp"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="교정형"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="자세에서 벗어나면 신호"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Cw.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="사용 노드" />
+
+            <com.example.myandroidapp.FlowLayout
+                android:id="@+id/use_nodes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="고르지 않은 부위는 어떻게 움직여도 판정에 영향이 없습니다." />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Cw.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="시작 지연" />
+
+                    <include
+                        android:id="@+id/delay"
+                        layout="@layout/item_stepper" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Cw.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="녹화 길이" />
+
+                    <include
+                        android:id="@+id/dur"
+                        layout="@layout/item_stepper" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Cw.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="녹화 간 일치 기준" />
+
+            <include
+                android:id="@+id/match"
+                layout="@layout/item_slider" />
+        </LinearLayout>
+
+        <!-- 녹화와 검토 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Cw.H2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="녹화와 검토" />
+
+                <TextView
+                    android:id="@+id/btn_rec"
+                    style="@style/Cw.Btn"
+                    android:background="@drawable/btn_record"
+                    android:drawableStart="@drawable/dot_white"
+                    android:drawablePadding="10dp"
+                    android:minHeight="52dp"
+                    android:paddingLeft="18dp"
+                    android:paddingRight="18dp"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/kept_count"
+                    style="@style/Cw.Label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    style="@style/Cw.Body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="최소 3회 · 권장 10회" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/kept_bar"
+                style="@style/Cw.Bar"
+                android:layout_marginTop="6dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="100" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="녹화 중 노드 연결이 끊기면 그 기록은 무효 처리되고 다시 녹화하라고 안내합니다." />
+
+            <LinearLayout
+                android:id="@+id/takes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/takes_empty"
+                style="@style/Cw.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_soft"
+                android:padding="16dp"
+                android:text="아직 녹화 기록이 없습니다. 보조자가 녹화 버튼을 누르면, 시작 지연 동안 사용자가 자세를 준비합니다." />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="14dp"
+                android:background="@color/cw_track" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btn_save_phone"
+                    style="@style/Cw.Btn.OutlinePrimary"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="폰에 저장"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/btn_save_hub"
+                    style="@style/Cw.Btn.Primary"
+                    android:layout_width="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="허브에 넣기"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/save_hint"
+                style="@style/Cw.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

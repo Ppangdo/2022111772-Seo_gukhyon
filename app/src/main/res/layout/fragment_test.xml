@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 사용자 움직임 흉내 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                style="@style/Cw.H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사용자 움직임 흉내" />
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="목업 전용 · 실제 제품에서는 센서값이 들어옵니다" />
+
+            <com.example.myandroidapp.FlowLayout
+                android:id="@+id/sim_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" />
+
+            <CheckBox
+                android:id="@+id/send_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="44dp"
+                android:text="출력 실제 보내기"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="끄면 스피커는 울리지 않고 화면에만 표시합니다" />
+        </LinearLayout>
+
+        <!-- 신체 모형 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                android:id="@+id/fig_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/readout"
+                style="@style/Cw.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
+
+            <com.example.myandroidapp.BodyView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="380dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="신체 모형" />
+
+            <TextView
+                style="@style/Cw.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="흉내 버튼으로 사용자의 움직임을 재현합니다." />
+        </LinearLayout>
+
+        <!-- 허브 동작 실시간 판정 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                style="@style/Cw.H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="허브 동작 실시간 판정" />
+
+            <LinearLayout
+                android:id="@+id/live"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- 발동 기록 -->
+        <LinearLayout style="@style/Cw.Card">
+
+            <TextView
+                style="@style/Cw.H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="발동 기록" />
+
+            <LinearLayout
+                android:id="@+id/log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/log_empty"
+                style="@style/Cw.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="아직 발동한 동작이 없습니다. 위의 흉내 버튼을 눌러 보세요." />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
