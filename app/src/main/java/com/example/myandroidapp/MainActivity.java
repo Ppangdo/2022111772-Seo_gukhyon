@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements AppState.Listener
 
     @Override
     public void onStateChanged() {
-        chipHub.setText("허브 연결됨 · 노드 " + s.nodes.size() + "개");
+        chipHub.setText("허브 연결 · 노드 " + s.nodes.size());
         if (!s.tab.equals(shownTab)) showTab(s.tab);
     }
 

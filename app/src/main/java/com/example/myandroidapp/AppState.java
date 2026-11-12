@@ -155,6 +155,7 @@ public class AppState {
     }
 
     private final MotionDbHelper db;
+    private final Feedback feedback;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final List<Listener> listeners = new ArrayList<>();
     private final Random random = new Random();
@@ -217,6 +218,7 @@ public class AppState {
 
     private AppState(Context context) {
         db = new MotionDbHelper(context);
+        feedback = new Feedback(context);
         nodes.add(new Node("01", "chest", 82, "good", true));
         nodes.add(new Node("02", "rua", 74, "good", false));
         nodes.add(new Node("03", "rla", 15, "good", false));
@@ -350,16 +352,19 @@ public class AppState {
         if (n > 0) {
             measure = "count";
             measureN = n;
+            feedback.tick();
             changed();
             later(() -> measureStep(n - 1), 1000);
         } else {
             measure = "measure";
             measureT0 = System.currentTimeMillis();
             measureProg = 0;
+            feedback.start();
             changed();
             later(() -> {
                 measure = "done";
                 measuredAt = hhmmss();
+                feedback.done();
                 changed();
             }, 2000);
         }
@@ -533,6 +538,7 @@ public class AppState {
     }
 
     public void toggleRecNode(String id) {
+        if (!"idle".equals(recPhase)) return;
         if (rec.nodes.contains(id)) rec.nodes.remove(id);
         else rec.nodes.add(id);
         changed();
@@ -570,9 +576,11 @@ public class AppState {
         if (n > 0) {
             recPhase = "count";
             countN = n;
+            feedback.tick();
             changed();
             later(() -> recStep(n - 1, sim), 1000);
         } else {
+            feedback.start();
             recPhase = "rec";
             recT0 = System.currentTimeMillis();
             recPlan = sim;
@@ -596,7 +604,10 @@ public class AppState {
             recProg = Math.round(p * 100);
             if (p >= 1) {
                 takeSeq++;
-                takes.add(new Take(takeSeq, recPlan, recPlan >= rec.match ? Boolean.TRUE : null));
+                boolean ok = recPlan >= rec.match;
+                takes.add(new Take(takeSeq, recPlan, ok ? Boolean.TRUE : null));
+                if (ok) feedback.done();
+                else feedback.warn();
                 recPhase = "idle";
                 recProg = 0;
                 armR = 4;
@@ -903,6 +914,8 @@ public class AppState {
                 f.until = now + 1800;
                 f.warn = !a.isPose();
                 flash = f;
+                if (a.isPose()) feedback.done();
+                else feedback.warn();
             }
         }
         return fired;

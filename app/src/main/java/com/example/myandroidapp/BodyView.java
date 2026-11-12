@@ -54,7 +54,7 @@ public class BodyView extends View {
     private final Matrix matrix = new Matrix();
     private final Matrix inverse = new Matrix();
     private List<Seg> segs = new ArrayList<>();
-    private float scale = 1, offX, offY;
+    private float scale = 1, offX, offY, topSpace = TOP;
 
     private float downX, downY;
     private AppState.Node downNode;
@@ -153,9 +153,12 @@ public class BodyView extends View {
 
     // 모형 좌표 → 화면 좌표. 누운 자세는 -90도 돌려 0.55배, 뒤에서 보기는 좌우 반전.
     private void updateMatrix() {
-        scale = Math.min(getWidth() / W, getHeight() / (H + TOP));
+        // A 화면은 팔을 들지 않으므로 위 여백 없이 모형을 크게 그린다
+        float top = "A".equals(mode) ? 24 : TOP;
+        scale = Math.min(getWidth() / W, getHeight() / (H + top));
         offX = (getWidth() - W * scale) / 2;
-        offY = (getHeight() - (H + TOP) * scale) / 2 + TOP * scale;
+        offY = (getHeight() - (H + top) * scale) / 2 + top * scale;
+        topSpace = top;
         matrix.reset();
         matrix.postTranslate(-W / 2, -H / 2);
         if (s.back) matrix.postScale(-1, 1);
@@ -183,7 +186,7 @@ public class BodyView extends View {
             text.setTextSize(13 * getResources().getDisplayMetrics().scaledDensity);
             text.setColor(Ui.MUTED);
             text.setTextAlign(Paint.Align.LEFT);
-            float labelY = offY - TOP * scale + 14 * dpx;
+            float labelY = offY - topSpace * scale + 14 * dpx;
             canvas.drawText(s.back ? "L 왼쪽" : "R 오른쪽", offX, labelY, text);
             text.setTextAlign(Paint.Align.RIGHT);
             canvas.drawText(s.back ? "R 오른쪽" : "L 왼쪽", offX + W * scale, labelY, text);
@@ -381,14 +384,17 @@ public class BodyView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        if (s == null || !"A".equals(mode)) return false;
+        // A: 부위·노드 누르기와 끌기, B: 노드 누르기(사용 노드 고르기)만
+        boolean isA = "A".equals(mode);
+        if (s == null || callbacks == null || !(isA || "B".equals(mode))) return false;
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 downX = e.getX();
                 downY = e.getY();
                 longPressed = false;
                 downNode = nodeAtPoint(downX, downY);
-                if (downNode != null && !downNode.hub) {
+                if (!isA && downNode == null) return false;
+                if (isA && downNode != null && !downNode.hub) {
                     postDelayed(longPress, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
@@ -401,7 +407,7 @@ public class BodyView extends View {
                     performClick();
                     if (downNode != null) {
                         callbacks.onNodeTap(downNode);
-                    } else {
+                    } else if (isA) {
                         String seg = segAtPoint(downX, downY, false);
                         if (seg != null) callbacks.onSegmentTap(seg);
                     }

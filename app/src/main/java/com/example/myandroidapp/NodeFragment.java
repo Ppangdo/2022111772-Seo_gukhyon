@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.slider.Slider;
 
 // A. 노드 설정·보정
@@ -27,7 +28,7 @@ public class NodeFragment extends Fragment implements AppState.Listener {
     private LinearLayout measureBar;
     private TextView nodeCount, btnAddNode, trayEmpty, identMsg;
     private LinearLayout tray, trayList;
-    private TextView selName;
+    private TextView selName, selSummary;
     private View selHasNode, selNoNode, btnUnplace, confirmBox;
     private final View[] cells = new View[4];
     private final Slider[] sliders = new Slider[3];
@@ -89,6 +90,13 @@ public class NodeFragment extends Fragment implements AppState.Listener {
             return true;
         });
 
+        // 설정 시트: 머리 부분을 누르면 펼치고 접는다
+        BottomSheetBehavior<View> sheet = BottomSheetBehavior.from(root.findViewById(R.id.sheet));
+        root.findViewById(R.id.sheet_header).setOnClickListener(v -> sheet.setState(
+                sheet.getState() == BottomSheetBehavior.STATE_EXPANDED
+                        ? BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_EXPANDED));
+        selSummary = root.findViewById(R.id.sel_summary);
+
         selName = root.findViewById(R.id.sel_name);
         selHasNode = root.findViewById(R.id.sel_has_node);
         selNoNode = root.findViewById(R.id.sel_no_node);
@@ -149,7 +157,7 @@ public class NodeFragment extends Fragment implements AppState.Listener {
         Ui.bindNote(root, s);
         boolean lie = "lie".equals(s.base);
 
-        figTitle.setText("신체 모형 · " + AppState.baseName(s.base));
+        figTitle.setText("신체 모형 · " + AppState.baseName(s.base) + " · 배치 " + s.placedCount() + "/" + s.nodes.size());
         Ui.pill(btnFront, !s.back, 10);
         Ui.pill(btnBack, s.back, 10);
         figHint.setText(lie ? "누운 자세 기준입니다. 모형을 돌려서 보여줍니다."
@@ -208,8 +216,11 @@ public class NodeFragment extends Fragment implements AppState.Listener {
             dot.setBackground(Ui.round(requireContext(), n.hub ? Ui.INK : (n.warn() ? Ui.WARN : Ui.PRIMARY), 0, 0, 999));
             ((TextView) chip.findViewById(R.id.chip_name)).setText("노드 " + n.id);
             TextView status = chip.findViewById(R.id.chip_status);
-            status.setText((n.weak() ? "연결 불량" : (n.lowBat() ? "배터리 부족" : "정상")) + " · 배터리 " + n.bat + "%");
+            status.setText(n.weak() ? "연결 불량" : (n.lowBat() ? "배터리 부족" : "배터리 " + n.bat + "%"));
             status.setTextColor(n.warn() ? Ui.WARN_DARK : Ui.MUTED);
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) chip.getLayoutParams();
+            lp.bottomMargin = 0;
+            lp.setMarginEnd(Ui.dp(requireContext(), 8));
             final AppState.Node node = n;
             chip.setOnClickListener(v -> s.togglePlacing(node.id));
             chip.setOnLongClickListener(v -> {
@@ -227,6 +238,9 @@ public class NodeFragment extends Fragment implements AppState.Listener {
         AppState.Node n = s.nodeAt(s.selSeg);
         selHasNode.setVisibility(n != null ? View.VISIBLE : View.GONE);
         selNoNode.setVisibility(n == null ? View.VISIBLE : View.GONE);
+        selSummary.setText(n == null ? "노드 없음"
+                : "노드 " + n.id + (n.hub ? " (허브)" : "") + " · 배터리 " + n.bat + "%" + (n.weak() ? " · 연결 불량" : ""));
+        selSummary.setTextColor(n != null && n.warn() ? Ui.WARN_DARK : Ui.MUTED);
         if (n != null) {
             setCell(0, "노드 번호", n.hub ? n.id + " (허브)" : n.id, false);
             setCell(1, "배터리", n.bat + "%" + (n.lowBat() ? " 부족" : ""), n.lowBat());

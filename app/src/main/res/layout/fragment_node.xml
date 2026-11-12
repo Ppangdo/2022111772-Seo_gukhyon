@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- A 화면: 위쪽은 스크롤 없는 작업대(모형 + 미배치 노드), 설정은 아래에서 끌어올리는 시트 -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 작업대: 모형과 미배치 노드가 늘 한 화면에 보인다 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingLeft="12dp"
+        android:paddingTop="10dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="96dp">
 
-        <include layout="@layout/layout_note" />
-
-        <!-- 신체 모형 -->
-        <LinearLayout style="@style/Cw.Card">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -26,12 +34,13 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/btn_front"
                     style="@style/Cw.Btn"
+                    android:minHeight="40dp"
                     android:paddingLeft="12dp"
                     android:paddingRight="12dp"
                     android:text="앞에서" />
@@ -40,176 +49,125 @@
                     android:id="@+id/btn_back"
                     style="@style/Cw.Btn"
                     android:layout_marginStart="4dp"
+                    android:minHeight="40dp"
                     android:paddingLeft="12dp"
                     android:paddingRight="12dp"
                     android:text="뒤에서" />
             </LinearLayout>
 
-            <com.example.myandroidapp.BodyView
-                android:id="@+id/body"
+            <!-- 모형이 남는 높이를 모두 쓴다. 안내 띠는 모형 위에 겹쳐 띄워 모형 크기가 바뀌지 않게 한다 -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="420dp"
-                android:layout_marginTop="8dp"
-                android:contentDescription="신체 모형" />
+                android:layout_height="0dp"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/fig_hint"
-                style="@style/Cw.Small"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center" />
+                <com.example.myandroidapp.BodyView
+                    android:id="@+id/body"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="신체 모형" />
 
-            <!-- 폰에서는 모형과 같이 보이도록 미배치 칸을 모형 바로 아래에 둔다 -->
+                <include
+                    layout="@layout/layout_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom" />
+            </FrameLayout>
+
+            <!-- 미배치 노드: 가로 한 줄. 노드를 길게 눌러 위 모형으로 끌거나, 모형의 노드를 여기로 끌어 해제 -->
             <LinearLayout
                 android:id="@+id/tray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/bg_tray"
                 android:contentDescription="미배치 노드"
+                android:gravity="center_vertical"
                 android:minHeight="64dp"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="horizontal"
+                android:paddingLeft="12dp"
+                android:paddingRight="4dp">
 
                 <TextView
                     style="@style/Cw.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="미배치 노드"
+                    android:layout_marginEnd="8dp"
+                    android:text="미배치"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tray_empty"
-                    style="@style/Cw.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="미배치 노드가 없습니다." />
-
-                <LinearLayout
-                    android:id="@+id/tray_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 기준 자세 -->
-        <LinearLayout style="@style/Cw.Card">
-
-            <TextView
-                style="@style/Cw.H2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="기준 자세" />
-
-            <TextView
-                style="@style/Cw.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="사용자가 편하게 취할 수 있는 자세를 고른 뒤 측정합니다. 모든 동작은 이 기준에서 계산됩니다." />
-
-            <LinearLayout
-                android:id="@+id/base_pills"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/btn_measure"
-                    style="@style/Cw.Btn.Primary" />
-
-                <TextView
-                    android:id="@+id/measure_status"
-                    style="@style/Cw.Body"
+                <HorizontalScrollView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1" />
-            </LinearLayout>
+                    android:layout_weight="1"
+                    android:scrollbars="none">
 
-            <LinearLayout
-                android:id="@+id/measure_bar"
-                style="@style/Cw.Bar"
-                android:layout_marginTop="12dp">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0" />
+                        <TextView
+                            android:id="@+id/tray_empty"
+                            style="@style/Cw.Small"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="없음 · 모형의 노드를 길게 눌러 여기로 끌면 배치가 해제됩니다" />
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="100" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 노드 -->
-        <LinearLayout style="@style/Cw.Card">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/Cw.H2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="노드" />
-
-                <TextView
-                    android:id="@+id/node_count"
-                    style="@style/Cw.Body"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1" />
+                        <LinearLayout
+                            android:id="@+id/tray_list"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </LinearLayout>
+                </HorizontalScrollView>
 
                 <TextView
                     android:id="@+id/btn_add_node"
-                    style="@style/Cw.Btn.OutlinePrimary" />
+                    style="@style/Cw.Btn.OutlinePrimary"
+                    android:layout_marginStart="4dp"
+                    android:minHeight="40dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="13sp" />
             </LinearLayout>
-
-            <TextView
-                style="@style/Cw.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="미배치 노드는 신체 모형 바로 아래 칸에 있습니다. 길게 눌러 모형으로 끌어다 놓으면 가장 가까운 부위에 붙습니다. 끌기가 어렵다면 노드를 누른 뒤 부위를 누르세요. 모형의 노드를 길게 눌러 그 칸으로 끌어내면 배치가 해제됩니다." />
-
-            <TextView
-                android:id="@+id/btn_shake"
-                style="@style/Cw.Btn.Outline"
-                android:layout_marginTop="12dp"
-                android:text="실물 노드 흔들기 (시뮬레이션)" />
-
-            <TextView
-                android:id="@+id/ident_msg"
-                style="@style/Cw.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
         </LinearLayout>
+    </LinearLayout>
 
-        <!-- 선택한 부위 · 개인 보정 -->
-        <LinearLayout style="@style/Cw.Card">
+    <!-- 설정 시트: 접혀 있으면 선택한 부위만, 끌어올리면 전체 설정 -->
+    <LinearLayout
+        android:id="@+id/sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_sheet"
+        android:elevation="12dp"
+        android:orientation="vertical"
+        app:behavior_peekHeight="88dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <LinearLayout
+            android:id="@+id/sheet_header"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_track" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:baselineAligned="true"
                 android:orientation="horizontal">
 
@@ -226,156 +184,302 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/sel_has_node"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/sel_summary"
+                    style="@style/Cw.Small"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/cell0"
-                        layout="@layout/item_cell" />
-
-                    <include
-                        android:id="@+id/cell1"
-                        layout="@layout/item_cell" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/cell2"
-                        layout="@layout/item_cell" />
-
-                    <include
-                        android:id="@+id/cell3"
-                        layout="@layout/item_cell" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/btn_led"
-                        style="@style/Cw.Btn.Outline"
-                        android:text="LED 깜빡이기" />
-
-                    <TextView
-                        android:id="@+id/btn_unplace"
-                        style="@style/Cw.Btn.Outline"
-                        android:layout_marginStart="8dp"
-                        android:text="배치 해제" />
-                </LinearLayout>
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
             </LinearLayout>
 
             <TextView
-                android:id="@+id/sel_no_node"
-                style="@style/Cw.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="이 부위에는 노드가 없습니다." />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="@color/cw_track" />
-
-            <TextView
+                android:id="@+id/sheet_hint"
+                style="@style/Cw.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="개인 보정"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                style="@style/Cw.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="척추 측만증이나 골반 비틀림처럼 표준 자세가 어려운 몸이라면, 실제 몸과 다른 만큼 조절합니다. 2D 모형에는 좌우 기울기만 보입니다." />
-
-            <LinearLayout
-                android:id="@+id/sliders"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:orientation="vertical" />
+                android:text="위로 끌어올리면 노드 정보 · 개인 보정 · 기준 자세" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/btn_reset"
-                    style="@style/Cw.Btn.Outline"
-                    android:text="보정값 초기화" />
-
-                <TextView
-                    android:id="@+id/corr_summary"
-                    style="@style/Cw.Body"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/confirm_box"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_warn_box"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="24dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="모든 부위의 보정값을 0으로 되돌릴까요? 측정한 기준 자세는 그대로입니다."
-                    android:textColor="#6B2A07"
-                    android:textSize="14sp" />
+                <!-- 선택한 부위의 노드 · 개인 보정 -->
+                <LinearLayout style="@style/Cw.Card">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:id="@+id/sel_has_node"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <include
+                                android:id="@+id/cell0"
+                                layout="@layout/item_cell" />
+
+                            <include
+                                android:id="@+id/cell1"
+                                layout="@layout/item_cell" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal">
+
+                            <include
+                                android:id="@+id/cell2"
+                                layout="@layout/item_cell" />
+
+                            <include
+                                android:id="@+id/cell3"
+                                layout="@layout/item_cell" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/btn_led"
+                                style="@style/Cw.Btn.Outline"
+                                android:text="LED 깜빡이기" />
+
+                            <TextView
+                                android:id="@+id/btn_unplace"
+                                style="@style/Cw.Btn.Outline"
+                                android:layout_marginStart="8dp"
+                                android:text="배치 해제" />
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/btn_do_reset"
-                        style="@style/Cw.Btn"
-                        android:background="@drawable/btn_primary"
-                        android:backgroundTint="@color/cw_warn"
-                        android:text="되돌리기"
-                        android:textColor="@color/white" />
+                        android:id="@+id/sel_no_node"
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="이 부위에는 노드가 없습니다." />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/cw_track" />
 
                     <TextView
-                        android:id="@+id/btn_cancel_reset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="개인 보정"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="척추 측만증이나 골반 비틀림처럼 표준 자세가 어려운 몸이라면, 실제 몸과 다른 만큼 조절합니다. 2D 모형에는 좌우 기울기만 보입니다." />
+
+                    <LinearLayout
+                        android:id="@+id/sliders"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="vertical" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btn_reset"
+                            style="@style/Cw.Btn.Outline"
+                            android:text="보정값 초기화" />
+
+                        <TextView
+                            android:id="@+id/corr_summary"
+                            style="@style/Cw.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/confirm_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_warn_box"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="모든 부위의 보정값을 0으로 되돌릴까요? 측정한 기준 자세는 그대로입니다."
+                            android:textColor="#6B2A07"
+                            android:textSize="14sp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/btn_do_reset"
+                                style="@style/Cw.Btn"
+                                android:background="@drawable/btn_primary"
+                                android:backgroundTint="@color/cw_warn"
+                                android:text="되돌리기"
+                                android:textColor="@color/white" />
+
+                            <TextView
+                                android:id="@+id/btn_cancel_reset"
+                                style="@style/Cw.Btn.Outline"
+                                android:layout_marginStart="8dp"
+                                android:text="취소" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 노드 -->
+                <LinearLayout style="@style/Cw.Card">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Cw.H2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="노드" />
+
+                        <TextView
+                            android:id="@+id/node_count"
+                            style="@style/Cw.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/fig_hint"
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="미배치 노드를 길게 눌러 모형으로 끌어다 놓으면 가장 가까운 부위에 붙습니다. 끌기가 어렵다면 노드를 누른 뒤 부위를 누르세요." />
+
+                    <TextView
+                        android:id="@+id/btn_shake"
                         style="@style/Cw.Btn.Outline"
-                        android:layout_marginStart="8dp"
-                        android:text="취소" />
+                        android:layout_marginTop="12dp"
+                        android:text="실물 노드 흔들기 (시뮬레이션)" />
+
+                    <TextView
+                        android:id="@+id/ident_msg"
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+
+                <!-- 기준 자세 -->
+                <LinearLayout style="@style/Cw.Card">
+
+                    <TextView
+                        style="@style/Cw.H2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="기준 자세" />
+
+                    <TextView
+                        style="@style/Cw.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="사용자가 편하게 취할 수 있는 자세를 고른 뒤 측정합니다. 모든 동작은 이 기준에서 계산됩니다." />
+
+                    <LinearLayout
+                        android:id="@+id/base_pills"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btn_measure"
+                            style="@style/Cw.Btn.Primary" />
+
+                        <TextView
+                            android:id="@+id/measure_status"
+                            style="@style/Cw.Body"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/measure_bar"
+                        style="@style/Cw.Bar"
+                        android:layout_marginTop="12dp">
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="100" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
