@@ -1,23 +1,35 @@
 package com.example.myandroidapp;
 
+import android.content.ClipData;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.RectF;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-
 // C 화면 "폰에 저장된 동작" 리스트뷰의 어댑터
+// 행을 길게 누르면 위쪽 허브 슬롯 칸으로 끌어 넣을 수 있다
 public class MotionAdapter extends BaseAdapter {
+
+    public interface OnDelete {
+        void onDelete(AppState.Motion m);
+    }
+
+    static final String DRAG_LABEL = "motion";
 
     private final Context context;
     private final AppState s;
+    private final OnDelete onDelete;
 
-    public MotionAdapter(Context context, AppState s) {
+    public MotionAdapter(Context context, AppState s, OnDelete onDelete) {
         this.context = context;
         this.s = s;
+        this.onDelete = onDelete;
     }
 
     @Override
@@ -61,13 +73,46 @@ public class MotionAdapter extends BaseAdapter {
             hub.setBackground(Ui.round(context, Ui.PRIMARY_SOFT, 0, 0, 999));
         }
         row.findViewById(R.id.motion_insert).setOnClickListener(v -> s.insertToHub(m));
-        row.findViewById(R.id.motion_delete).setOnClickListener(v ->
-                new AlertDialog.Builder(context)
-                        .setTitle("동작 삭제")
-                        .setMessage("\"" + m.name + "\"을 폰에서 삭제할까요? 녹화 기록도 함께 지워집니다.")
-                        .setPositiveButton("삭제", (d, w) -> s.deleteAction(m))
-                        .setNegativeButton("취소", null)
-                        .show());
+        row.findViewById(R.id.motion_delete).setOnClickListener(v -> onDelete.onDelete(m));
+
+        // 길게 눌러 끌기 시작
+        View card = row.findViewById(R.id.motion_card);
+        card.setOnLongClickListener(v -> {
+            ClipData data = ClipData.newPlainText(DRAG_LABEL, String.valueOf(m.id));
+            v.startDragAndDrop(data, new NameShadow(context, m.name), null, 0);
+            return true;
+        });
+        card.setContentDescription(m.name + ", 길게 눌러 허브 슬롯으로 끌기");
         return row;
+    }
+
+    // 끌 때 손가락을 따라오는 동작 이름표
+    private static class NameShadow extends View.DragShadowBuilder {
+        private final String text;
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final int w, h, pad;
+
+        NameShadow(Context c, String text) {
+            this.text = text;
+            paint.setTextSize(Ui.dp(c, 15));
+            paint.setFakeBoldText(true);
+            pad = Ui.dp(c, 14);
+            w = (int) paint.measureText(text) + pad * 2;
+            h = Ui.dp(c, 44);
+        }
+
+        @Override
+        public void onProvideShadowMetrics(Point size, Point touch) {
+            size.set(w, h);
+            touch.set(w / 2, h / 2);
+        }
+
+        @Override
+        public void onDrawShadow(Canvas canvas) {
+            paint.setColor(Ui.PRIMARY);
+            canvas.drawRoundRect(new RectF(0, 0, w, h), h / 2f, h / 2f, paint);
+            paint.setColor(Ui.WHITE);
+            canvas.drawText(text, pad, h / 2f - (paint.descent() + paint.ascent()) / 2, paint);
+        }
     }
 }

@@ -237,7 +237,21 @@ public class AppState {
         listeners.remove(l);
     }
 
+    private String scheduledNote = "";
+
     private void changed() {
+        // 안내 띠는 5초 뒤 저절로 사라진다(노드를 붙일 부위를 고르는 중에는 남겨 둔다)
+        if (!note.isEmpty() && !note.equals(scheduledNote)) {
+            final String shown = note;
+            scheduledNote = shown;
+            later(() -> {
+                if (note.equals(shown) && placing == null) {
+                    note = "";
+                    scheduledNote = "";
+                    changed();
+                }
+            }, 5000);
+        }
         for (Listener l : new ArrayList<>(listeners)) l.onStateChanged();
     }
 
@@ -304,6 +318,11 @@ public class AppState {
 
     public void clearNote() {
         note = "";
+        changed();
+    }
+
+    public void showNote(String msg) {
+        note = msg;
         changed();
     }
 
@@ -806,9 +825,46 @@ public class AppState {
         changed();
     }
 
+    // 목록의 동작을 슬롯 칸으로 끌어 놓았을 때. 원래 있던 동작은 폰에만 남는다.
+    public void placeInSlot(Motion m, int slot) {
+        if (m.hubSlot == slot) return;
+        Motion old = hubAt(slot);
+        int from = m.hubSlot;
+        if (from >= 0) {
+            // 다른 슬롯에 있던 동작이면 두 자리를 맞바꾼다
+            m.hubSlot = -1;
+            if (old != null) {
+                old.hubSlot = from;
+                db.update(old);
+            }
+        }
+        setSlot(slot, m);
+        pickFor = null;
+        sync = "pending";
+        note = "\"" + m.name + "\"을 허브 슬롯 " + (slot + 1) + "에 넣었습니다."
+                + (old != null && from < 0 ? " \"" + old.name + "\"은 폰에 남아 있습니다." : "");
+        changed();
+    }
+
+    private Motion lastDeleted;
+    private int lastDeletedIndex;
+
     public void deleteAction(Motion m) {
+        lastDeletedIndex = actions.indexOf(m);
+        lastDeleted = m;
         db.delete(m.id);
         actions.remove(m);
+        changed();
+    }
+
+    // 방금 지운 동작을 되살린다(새 행으로 다시 저장)
+    public void undoDelete() {
+        Motion m = lastDeleted;
+        if (m == null) return;
+        lastDeleted = null;
+        m.hubSlot = -1;
+        m.id = db.insert(m);
+        actions.add(Math.min(Math.max(lastDeletedIndex, 0), actions.size()), m);
         changed();
     }
 
