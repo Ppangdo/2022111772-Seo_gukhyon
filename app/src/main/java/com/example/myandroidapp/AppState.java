@@ -112,6 +112,7 @@ public class AppState {
         public final int n;
         public final int sim;
         public Boolean kept; // true 남김, false 버림, null 경고(결정 필요)
+        public float peak = -1; // 폰 센서로 녹화한 기록: 최고 팔 각도(포즈형) 또는 최대 기울기 각도(교정형)
 
         Take(int n, int sim, Boolean kept) {
             this.n = n;
@@ -214,11 +215,22 @@ public class AppState {
     private float busyArm = 20, busyLean = 0.1f;
     private long busyT;
 
+    // 폰 센서 모드: 폰 자체를 오른 아래팔 노드 하나로 쓴다(SensorService 가 값을 보낸다)
+    public final boolean hasPhoneSensor;
+    public boolean phoneMode;
+    public float phoneTilt = -1;   // 폰 세로축이 위쪽과 이루는 각도(도), -1 은 아직 값 없음
+    private float tilt0 = -1;      // 기준 자세에서의 각도(측정 순간 방향 = 0)
+    public boolean measuredByPhone;
+    private float measureSum;
+    private int measureCnt;
+    private float recPeakArm, recPeakLean;
+
     public String note = "";
 
     private AppState(Context context) {
         db = new MotionDbHelper(context);
         feedback = new Feedback(context);
+        hasPhoneSensor = SensorService.available(context);
         nodes.add(new Node("01", "chest", 82, "good", true));
         nodes.add(new Node("02", "rua", 74, "good", false));
         nodes.add(new Node("03", "rla", 15, "good", false));
@@ -279,6 +291,7 @@ public class AppState {
         if ("measure".equals(measure)) measureProg = (int) Math.min(100, (now - measureT0) / 20);
         if ("B".equals(tab)) structural |= recTick(now);
         if ("D".equals(tab)) structural |= simTick(now);
+        if ("A".equals(tab) && phoneMode) followPhone(0.35f);
 
         if (structural) {
             changed();
@@ -310,8 +323,68 @@ public class AppState {
             lastFire.clear();
             sims.clear();
             badMs.clear();
-            simMode = "idle";
+            simMode = phoneMode ? "phone" : "idle";
             flash = null;
+        }
+        changed();
+    }
+
+    // ---------- 폰 센서 ----------
+
+    // SensorService 가 센서 값이 올 때마다(약 50Hz) 부른다
+    public void onPhoneTilt(float deg) {
+        phoneTilt = deg;
+        if (tilt0 < 0) tilt0 = deg; // 기준 자세를 아직 안 쟀으면 처음 받은 방향을 임시 기준으로
+        if ("measure".equals(measure)) {
+            measureSum += deg;
+            measureCnt++;
+        }
+    }
+
+    // 기준 자세에서 얼마나 돌아갔는지(0~180°)
+    private float phoneTheta() {
+        if (phoneTilt < 0 || tilt0 < 0) return 0;
+        return Math.abs(phoneTilt - tilt0);
+    }
+
+    // 노드가 하나뿐이라 팔 들기와 상체 숙이기를 각도 범위로 나눠 해석한다.
+    // 45° 미만: 상체를 숙여 팔째로 기운 것, 45° 이상: 팔을 든 것(70°까지 숙임 해석을 서서히 줄임)
+    public float phoneArm() {
+        float t = phoneTheta();
+        return Math.max(4, Math.min(150, t < 45 ? 4 + t * 0.2f : 4 + t));
+    }
+
+    public float phoneLean() {
+        float t = phoneTheta();
+        float lean = Math.max(0, Math.min(1, (t - 8) / 27f));
+        if (t > 45) lean *= Math.max(0, (70 - t) / 25f);
+        return lean;
+    }
+
+    private void followPhone(float k) {
+        armR += (phoneArm() - armR) * k;
+        lean += (phoneLean() - lean) * k;
+        elbowR = armR > 60 ? 12 : 4;
+    }
+
+    public void togglePhoneMode() {
+        setPhoneMode(!phoneMode);
+    }
+
+    public void setPhoneMode(boolean on) {
+        if (on && !hasPhoneSensor) {
+            note = "이 기기에는 방향 센서가 없어 폰 센서 모드를 쓸 수 없습니다. 시뮬레이션으로 테스트하세요.";
+            changed();
+            return;
+        }
+        phoneMode = on;
+        if (!on) phoneTilt = -1;
+        if ("D".equals(tab)) {
+            simMode = on ? "phone" : "idle";
+            busyT = 0;
+        }
+        if (on && !measuredByPhone) {
+            note = "폰 센서 모드: 폰을 오른 아래팔에 길게 대세요. A 탭에서 기준 자세를 측정하면 그 방향이 0°가 됩니다.";
         }
         changed();
     }
@@ -378,11 +451,23 @@ public class AppState {
             measure = "measure";
             measureT0 = System.currentTimeMillis();
             measureProg = 0;
+            measureSum = 0;
+            measureCnt = 0;
             feedback.start();
             changed();
             later(() -> {
                 measure = "done";
                 measuredAt = hhmmss();
+                // 폰 센서 모드면 2초 동안 받은 방향의 평균을 기준(0°)으로 저장한다
+                if (phoneMode && measureCnt > 0) {
+                    tilt0 = measureSum / measureCnt;
+                    measuredByPhone = true;
+                    note = "폰 센서로 기준 자세를 저장했습니다(" + measureCnt + "개 값 평균). 이 방향이 0°입니다.";
+                } else if (phoneMode) {
+                    note = "센서 값이 들어오지 않아 기준 자세를 저장하지 못했습니다.";
+                } else {
+                    measuredByPhone = false;
+                }
                 feedback.done();
                 changed();
             }, 2000);
@@ -604,6 +689,8 @@ public class AppState {
             recT0 = System.currentTimeMillis();
             recPlan = sim;
             recProg = 0;
+            recPeakArm = 4;
+            recPeakLean = 0;
             changed();
         }
     }
@@ -612,7 +699,12 @@ public class AppState {
         boolean structural = false;
         if ("rec".equals(recPhase)) {
             float p = Math.min(1f, (now - recT0) / (rec.dur * 1000f));
-            if (rec.isPose()) {
+            if (phoneMode) {
+                // 모형이 실제 움직임을 따라가고, 녹화 중 최고값을 기억한다
+                followPhone(0.5f);
+                recPeakArm = Math.max(recPeakArm, phoneArm());
+                recPeakLean = Math.max(recPeakLean, phoneLean());
+            } else if (rec.isPose()) {
                 float peak = 150 - (100 - recPlan) * 1.6f;
                 armR = 4 + (peak - 4) * ease(Math.min(1f, p * 1.6f));
                 lean = 0;
@@ -623,8 +715,15 @@ public class AppState {
             recProg = Math.round(p * 100);
             if (p >= 1) {
                 takeSeq++;
+                float peak = -1;
+                if (phoneMode) {
+                    peak = rec.isPose() ? recPeakArm : recPeakLean * 35;
+                    recPlan = phoneSim(peak);
+                }
                 boolean ok = recPlan >= rec.match;
-                takes.add(new Take(takeSeq, recPlan, ok ? Boolean.TRUE : null));
+                Take take = new Take(takeSeq, recPlan, ok ? Boolean.TRUE : null);
+                take.peak = peak;
+                takes.add(take);
                 if (ok) feedback.done();
                 else feedback.warn();
                 recPhase = "idle";
@@ -636,11 +735,13 @@ public class AppState {
         } else if (replay != null) {
             float p = Math.min(1f, (now - replayT0) / 1600f);
             float k = p < 0.75f ? ease(p / 0.75f) : 1f;
+            boolean real = replay.peak >= 0; // 폰 센서로 녹화한 기록은 실제 최고값으로 재생
             if (rec.isPose()) {
-                armR = 4 + (150 - (100 - replay.sim) * 1.6f - 4) * k;
+                float peak = real ? replay.peak : 150 - (100 - replay.sim) * 1.6f;
+                armR = 4 + (peak - 4) * k;
                 lean = 0;
             } else {
-                lean = ((100 - replay.sim) / 60f) * k;
+                lean = (real ? replay.peak / 35f : (100 - replay.sim) / 60f) * k;
                 armR = 4;
             }
             if (p >= 1) {
@@ -649,11 +750,27 @@ public class AppState {
                 lean = 0;
                 structural = true;
             }
+        } else if (phoneMode) {
+            followPhone(0.35f);
         } else if ("count".equals(recPhase)) {
             armR = 4 + 2 * (float) Math.sin(now / 500.0);
         }
         elbowR = armR > 60 ? 12 : 4;
         return structural;
+    }
+
+    // 폰 센서로 녹화한 기록의 일치도.
+    // 대표 기록(남긴 것 중 최고)이 있으면 그 최고값과 비교하고, 없으면 목표 자세(팔 150°, 기울기 0°)와 비교한다.
+    private int phoneSim(float peak) {
+        Take rep = null;
+        for (Take t : takes) {
+            if (Boolean.TRUE.equals(t.kept) && t.peak >= 0 && (rep == null || t.sim > rep.sim)) rep = t;
+        }
+        float v;
+        if (rep != null) v = 100 - Math.abs(peak - rep.peak) * 1.2f;
+        else if (rec.isPose()) v = 100 - Math.abs(150 - peak) * 0.55f;
+        else v = 100 - peak / 35f * 65;
+        return Math.round(Math.max(0, Math.min(100, v)));
     }
 
     public void startReplay(Take t) {
@@ -885,8 +1002,14 @@ public class AppState {
     // ---------- D. 실시간 테스트 ----------
 
     public void setSimMode(String mode) {
+        if ("phone".equals(mode)) {
+            setPhoneMode(true);
+            return;
+        }
         busyT = 0;
         simMode = mode;
+        phoneMode = false;
+        phoneTilt = -1;
         changed();
     }
 
@@ -904,7 +1027,13 @@ public class AppState {
     private boolean simTick(long now) {
         float tArm = 6 + 4 * (float) Math.sin(now / 700.0);
         float tLean = 0.03f;
-        if ("arm".equals(simMode)) {
+        float k = 0.12f;
+        if (phoneMode) {
+            // 목표값 대신 실제 센서 값(이미 서비스에서 저역통과 필터를 거침)
+            tArm = phoneArm();
+            tLean = phoneLean();
+            k = 0.4f;
+        } else if ("arm".equals(simMode)) {
             tArm = 150;
         } else if ("lean".equals(simMode)) {
             tArm = 6;
@@ -918,8 +1047,8 @@ public class AppState {
             tArm = busyArm;
             tLean = busyLean;
         }
-        armR += (tArm - armR) * 0.12f;
-        lean += (tLean - lean) * 0.1f;
+        armR += (tArm - armR) * k;
+        lean += (tLean - lean) * (phoneMode ? k : 0.1f);
         elbowR = armR > 60 ? 12 : 4;
 
         boolean fired = false;

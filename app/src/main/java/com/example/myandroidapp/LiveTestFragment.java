@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
@@ -27,7 +28,7 @@ import java.util.Locale;
 public class LiveTestFragment extends Fragment implements AppState.Listener {
 
     private static final String[][] SIM_MODES = {
-            {"arm", "오른팔 들기"}, {"lean", "허리 굽히기"}, {"busy", "평소 움직임"}, {"idle", "가만히"}};
+            {"phone", "폰 센서"}, {"arm", "오른팔 들기"}, {"lean", "허리 굽히기"}, {"busy", "평소 움직임"}, {"idle", "가만히"}};
 
     private static class LiveRow {
         AppState.Motion motion;
@@ -41,7 +42,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
     private BodyView body;
     private BottomSheetBehavior<View> sheet;
     private NestedScrollView sheetScroll;
-    private TextView readout, logEmpty, lastFire, logCount;
+    private TextView readout, logEmpty, lastFire, logCount, simTitle;
     private LinearLayout simButtons, liveBox, sensList, logBox;
     private CheckBox sendOut;
     private final LiveRow[] rows = new LiveRow[3];
@@ -55,6 +56,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         body = root.findViewById(R.id.body);
         body.setup(s, "D", null);
 
+        simTitle = root.findViewById(R.id.sim_title);
         simButtons = root.findViewById(R.id.sim_buttons);
         for (String[] m : SIM_MODES) {
             TextView p = (TextView) inflater.inflate(R.layout.item_pill, simButtons, false);
@@ -63,7 +65,18 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             p.setText(m[1]);
             p.setTag(m[0]);
             final String mode = m[0];
-            p.setOnClickListener(v -> s.setSimMode(mode));
+            p.setOnClickListener(v -> {
+                if ("phone".equals(mode) && !s.hasPhoneSensor) {
+                    // 센서가 없는 기기(일부 에뮬레이터 등): 흐리게 보이고, 누르면 이유를 알려 준다
+                    Toast.makeText(requireContext(), "이 기기에는 방향 센서가 없어 폰 센서 모드를 쓸 수 없습니다.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if ("phone".equals(mode) && !s.phoneMode && !s.measuredByPhone) {
+                    Toast.makeText(requireContext(), "폰을 오른 아래팔에 길게 대세요. 지금 방향을 기준(0°)으로 씁니다. A 탭에서 기준 자세를 측정하면 더 정확합니다.", Toast.LENGTH_LONG).show();
+                }
+                s.setSimMode(mode);
+            });
+            if ("phone".equals(mode) && !s.hasPhoneSensor) p.setAlpha(0.45f);
             ((LinearLayout.LayoutParams) p.getLayoutParams()).setMarginEnd(Ui.dp(requireContext(), 8));
             simButtons.addView(p);
         }
@@ -119,6 +132,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Ui.pill(p, p.getTag().equals(s.simMode), 10);
         }
         if (sendOut.isChecked() != s.sendOut) sendOut.setChecked(s.sendOut);
+        simTitle.setText(s.phoneMode ? "폰 센서 · 폰을 오른 아래팔에 길게 대고 움직이세요"
+                : "사용자 움직임 흉내 · 목업 전용 (실제 제품에서는 센서값)");
 
         // 허브 구성이 바뀔 때만 행을 새로 만든다(슬라이더를 끄는 중에 사라지지 않게)
         StringBuilder sig = new StringBuilder();
@@ -231,7 +246,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         int n = s.log.size();
         logCount.setText(n > 0 ? "기록 " + n + " ›" : "기록 ›");
         if (n == 0) {
-            lastFire.setText("아직 발동 없음 · 흉내 버튼을 눌러 보세요");
+            lastFire.setText(s.phoneMode ? "아직 발동 없음 · 폰을 댄 팔을 머리 위로 들어 보세요"
+                    : "아직 발동 없음 · 흉내 버튼을 눌러 보세요");
             lastFire.setTextColor(Ui.MUTED);
             return;
         }

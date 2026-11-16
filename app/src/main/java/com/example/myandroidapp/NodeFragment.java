@@ -176,11 +176,12 @@ public class NodeFragment extends Fragment implements AppState.Listener {
                 break;
             case "measure":
                 btnMeasure.setText("측정 중");
-                measureStatus.setText("2초 동안 그대로 유지하세요.");
+                measureStatus.setText(s.phoneMode ? "2초 동안 그대로 유지하세요. 폰 센서 방향을 평균내는 중입니다."
+                        : "2초 동안 그대로 유지하세요.");
                 break;
             case "done":
                 btnMeasure.setText("다시 측정");
-                measureStatus.setText(name + "로 측정함 · " + s.measuredAt);
+                measureStatus.setText(name + "로 측정함 · " + s.measuredAt + (s.measuredByPhone ? " · 폰 센서" : ""));
                 break;
             default:
                 btnMeasure.setText("기준 자세 측정");

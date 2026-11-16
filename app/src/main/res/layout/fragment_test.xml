@@ -23,6 +23,7 @@
             android:paddingBottom="10dp">
 
             <TextView
+                android:id="@+id/sim_title"
                 style="@style/Cw.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
