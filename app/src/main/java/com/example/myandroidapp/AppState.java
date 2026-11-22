@@ -417,7 +417,7 @@ public class AppState {
     }
 
     public String readout() {
-        return "오른팔 " + Math.round(armR) + "° · 상체 앞 기울기 " + Math.round(lean * 35) + "°";
+        return "오른팔 " + Math.round(armR) + "° · 숙임 " + Math.round(lean * 35) + "°";
     }
 
     // ---------- A. 노드 설정·보정 ----------

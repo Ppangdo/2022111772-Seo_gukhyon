@@ -27,7 +27,7 @@
                 style="@style/Cw.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="사용자 움직임 흉내 · 목업 전용 (실제 제품에서는 센서값)"
+                android:text="사용자 움직임 흉내 · 시험용"
                 android:textStyle="bold" />
 
             <HorizontalScrollView
@@ -66,7 +66,7 @@
                     style="@style/Cw.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp" />
+                    android:textSize="14sp" />
 
                 <com.example.myandroidapp.BodyView
                     android:id="@+id/body"
@@ -76,18 +76,24 @@
                     android:contentDescription="신체 모형" />
             </LinearLayout>
 
-            <LinearLayout
+            <!-- 글자가 커져 슬롯 3개가 다 안 들어가면 이 열만 스크롤한다(모형은 그대로 보임) -->
+            <ScrollView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1.15"
+                android:fadeScrollbars="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="허브 동작 실시간 판정"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -103,8 +109,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="막대를 누르면 민감도를 바꿀 수 있습니다"
-                    android:textSize="12sp" />
+                    android:textSize="14sp" />
             </LinearLayout>
+            </ScrollView>
         </LinearLayout>
 
         <!-- 최근 발동: 누르면 발동 기록 -->
@@ -130,15 +137,15 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/log_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:textColor="@color/cw_primary"
-                android:textSize="14sp"
+                android:textColor="@color/cw_primary_text"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -178,7 +185,7 @@
                 android:id="@+id/btn_close_sheet"
                 style="@style/Cw.Btn"
                 android:text="닫기"
-                android:textColor="@color/cw_primary" />
+                android:textColor="@color/cw_primary_text" />
         </LinearLayout>
 
         <androidx.core.widget.NestedScrollView
@@ -224,9 +231,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:minHeight="44dp"
+                        android:minHeight="48dp"
                         android:text="출력 실제 보내기"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView

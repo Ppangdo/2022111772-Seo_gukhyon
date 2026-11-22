@@ -17,14 +17,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_soft"
-                android:backgroundTint="#EEF0F3"
+                android:backgroundTint="@color/cw_neutral"
                 android:paddingLeft="12dp"
                 android:paddingTop="6dp"
                 android:paddingRight="12dp"
                 android:paddingBottom="6dp"
                 android:text="다음 단계에서 구현"
                 android:textColor="@color/cw_muted"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="동작마다 어떤 수신 모듈의 어떤 포트로 신호를 보낼지 정하는 화면입니다. 이번 시연에서는 허브 슬롯 번호가 곧 소리 모듈의 트랙 번호입니다."
-                android:textSize="15sp" />
+                android:textSize="16sp" />
 
             <include
                 android:id="@+id/out_sound"

@@ -210,14 +210,14 @@ public class NodeFragment extends Fragment implements AppState.Listener {
             boolean active = n.id.equals(s.placing);
             boolean ident = n.id.equals(s.identify);
             chip.setBackground(active || ident
-                    ? Ui.round(requireContext(), 0xFFEEF3FE, Ui.PRIMARY, 2, 999)
-                    : Ui.round(requireContext(), Ui.WHITE, Ui.BTN_LINE, 1, 999));
+                    ? Ui.round(requireContext(), Ui.PRIMARY_SOFT, Ui.PRIMARY, 2, 999)
+                    : Ui.round(requireContext(), Ui.SURFACE, Ui.BTN_LINE, 1, 999));
             TextView dot = chip.findViewById(R.id.chip_dot);
             dot.setText(n.id);
-            dot.setBackground(Ui.round(requireContext(), n.hub ? Ui.INK : (n.warn() ? Ui.WARN : Ui.PRIMARY), 0, 0, 999));
+            dot.setBackground(Ui.round(requireContext(), n.hub ? Ui.HUB : (n.warn() ? Ui.WARN_STRONG : Ui.PRIMARY), 0, 0, 999));
             ((TextView) chip.findViewById(R.id.chip_name)).setText("노드 " + n.id);
             TextView status = chip.findViewById(R.id.chip_status);
-            status.setText(n.weak() ? "연결 불량" : (n.lowBat() ? "배터리 부족" : "배터리 " + n.bat + "%"));
+            status.setText(n.weak() ? "⚠ 연결 불량" : (n.lowBat() ? "⚠ 배터리 부족" : "배터리 " + n.bat + "%"));
             status.setTextColor(n.warn() ? Ui.WARN_DARK : Ui.MUTED);
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) chip.getLayoutParams();
             lp.bottomMargin = 0;
@@ -240,7 +240,7 @@ public class NodeFragment extends Fragment implements AppState.Listener {
         selHasNode.setVisibility(n != null ? View.VISIBLE : View.GONE);
         selNoNode.setVisibility(n == null ? View.VISIBLE : View.GONE);
         selSummary.setText(n == null ? "노드 없음"
-                : "노드 " + n.id + (n.hub ? " (허브)" : "") + " · 배터리 " + n.bat + "%" + (n.weak() ? " · 연결 불량" : ""));
+                : (n.warn() ? "⚠ " : "") + "노드 " + n.id + (n.hub ? " (허브)" : "") + " · 배터리 " + n.bat + "%" + (n.weak() ? " · 연결 불량" : ""));
         selSummary.setTextColor(n != null && n.warn() ? Ui.WARN_DARK : Ui.MUTED);
         if (n != null) {
             setCell(0, "노드 번호", n.hub ? n.id + " (허브)" : n.id, false);

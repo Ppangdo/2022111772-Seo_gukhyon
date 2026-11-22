@@ -67,7 +67,7 @@ public class BodyView extends View {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         stroke.setStyle(Paint.Style.STROKE);
         seat.setStyle(Paint.Style.STROKE);
-        seat.setColor(0xFFB8C0CC);
+        seat.setColor(Ui.SEAT);
         seat.setPathEffect(new DashPathEffect(new float[]{6, 4}, 0));
         text.setTextAlign(Paint.Align.CENTER);
         text.setFakeBoldText(true);
@@ -183,7 +183,7 @@ public class BodyView extends View {
         float dpx = getResources().getDisplayMetrics().density;
 
         if (!"lie".equals(s.base)) {
-            text.setTextSize(13 * getResources().getDisplayMetrics().scaledDensity);
+            text.setTextSize(14 * dpx); // 모형 위 글자는 dp: 글자 설정이 커져도 모형 안에서 겹치지 않게
             text.setColor(Ui.MUTED);
             text.setTextAlign(Paint.Align.LEFT);
             float labelY = offY - topSpace * scale + 14 * dpx;
@@ -197,7 +197,7 @@ public class BodyView extends View {
         canvas.concat(matrix);
         if ("sit".equals(s.base)) {
             RectF r = new RectF(96, 290, 264, 366);
-            fill.setColor(0xFFE4E8EE);
+            fill.setColor(Ui.SEAT_FILL);
             canvas.drawRoundRect(r, 12, 12, fill);
             seat.setStrokeWidth(1);
             canvas.drawRoundRect(r, 12, 12, seat);
@@ -205,8 +205,8 @@ public class BodyView extends View {
         for (Seg g : segs) {
             boolean corr = s.hasCorr(g.k);
             boolean sel = isA && g.k.equals(s.selSeg);
-            fill.setColor(g.k.equals(s.dragOver) ? 0xFFD6E1FA : (corr ? 0xFFE4E9F2 : 0xFFE9EDF3));
-            stroke.setColor(sel ? Ui.PRIMARY : (corr ? 0xFF7C93D9 : 0xFFC3CAD6));
+            fill.setColor(g.k.equals(s.dragOver) ? Ui.BODY_DROP : (corr ? Ui.BODY_CORR : Ui.BODY_FILL));
+            stroke.setColor(sel ? Ui.PRIMARY : (corr ? Ui.PRIMARY_PALE : Ui.BODY_LINE));
             stroke.setStrokeWidth(sel ? 3 : 2);
             canvas.save();
             RectF r;
@@ -231,7 +231,7 @@ public class BodyView extends View {
         canvas.restore();
 
         // 노드는 회전하지 않은 화면 좌표에 그려 번호가 늘 바로 보이게 한다
-        float radius = Math.max(16 * scale, 12 * dpx);
+        float radius = Math.max(18 * scale, 18 * dpx); // 지름 36dp 이상
         long now = System.currentTimeMillis();
         boolean animating = false;
         for (AppState.Node n : s.nodes) {
@@ -257,7 +257,7 @@ public class BodyView extends View {
                 canvas.drawCircle(c[0], c[1], radius + 3 * dpx, dot);
             }
             dot.setStyle(Paint.Style.FILL);
-            dot.setColor(n.hub ? Ui.INK : (n.warn() ? Ui.WARN : Ui.PRIMARY));
+            dot.setColor(n.hub ? Ui.HUB : (n.warn() ? Ui.WARN_STRONG : Ui.PRIMARY));
             dot.setAlpha(alpha);
             canvas.drawCircle(c[0], c[1], radius, dot);
             dot.setStyle(Paint.Style.STROKE);
@@ -268,7 +268,7 @@ public class BodyView extends View {
 
             text.setColor(Ui.WHITE);
             text.setAlpha(alpha);
-            text.setTextSize(Math.max(12 * scale, 10 * dpx));
+            text.setTextSize(Math.max(15 * scale, 14 * dpx));
             canvas.drawText(n.id, c[0], c[1] - (text.descent() + text.ascent()) / 2, text);
             text.setAlpha(255);
 
@@ -318,7 +318,7 @@ public class BodyView extends View {
         text.setColor(Ui.WHITE);
         text.setTextSize(52 * dpx);
         canvas.drawText(String.valueOf(s.countN), cx, cy + 8 * dpx, text);
-        text.setTextSize(13 * dpx);
+        text.setTextSize(16 * dpx);
         text.setFakeBoldText(false);
         canvas.drawText("자세를 준비하세요", cx, cy + 32 * dpx, text);
         text.setFakeBoldText(true);
@@ -329,12 +329,12 @@ public class BodyView extends View {
         TextPaint tp = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         tp.setColor(Ui.WHITE);
         tp.setFakeBoldText(true);
-        tp.setTextSize(15 * getResources().getDisplayMetrics().scaledDensity);
+        tp.setTextSize(20 * getResources().getDisplayMetrics().scaledDensity);
         StaticLayout layout = new StaticLayout(s.flash.text, tp, (int) (width - 32 * dpx),
                 Layout.Alignment.ALIGN_CENTER, 1f, 0f, false);
         float h = layout.getHeight() + 28 * dpx;
         dot.setStyle(Paint.Style.FILL);
-        dot.setColor(s.flash.warn ? Ui.WARN : Ui.PRIMARY);
+        dot.setColor(s.flash.warn ? Ui.WARN_STRONG : Ui.PRIMARY);
         canvas.drawRoundRect(new RectF(left, top, left + width, top + h), 12 * dpx, 12 * dpx, dot);
         canvas.save();
         canvas.translate(left + 16 * dpx, top + 14 * dpx);
@@ -345,7 +345,7 @@ public class BodyView extends View {
     // ---------- 누르기와 끌기 (A 화면) ----------
 
     private AppState.Node nodeAtPoint(float x, float y) {
-        float radius = Math.max(16 * scale, 12 * getResources().getDisplayMetrics().density) + Ui.dp(getContext(), 6);
+        float radius = Math.max(18 * scale, 18 * getResources().getDisplayMetrics().density) + Ui.dp(getContext(), 6);
         for (AppState.Node n : s.nodes) {
             if (n.seg == null) continue;
             float[] c = mapNode(n);
@@ -473,7 +473,7 @@ public class BodyView extends View {
             this.r = Ui.dp(c, 18);
             paint.setTextAlign(Paint.Align.CENTER);
             paint.setFakeBoldText(true);
-            paint.setTextSize(Ui.dp(c, 12));
+            paint.setTextSize(Ui.dp(c, 14));
         }
 
         @Override
@@ -484,7 +484,7 @@ public class BodyView extends View {
 
         @Override
         public void onDrawShadow(Canvas canvas) {
-            paint.setColor(node.warn() ? Ui.WARN : Ui.PRIMARY);
+            paint.setColor(node.warn() ? Ui.WARN_STRONG : Ui.PRIMARY);
             canvas.drawCircle(r, r, r, paint);
             paint.setColor(Ui.WHITE);
             canvas.drawText(node.id, r, r - (paint.descent() + paint.ascent()) / 2, paint);

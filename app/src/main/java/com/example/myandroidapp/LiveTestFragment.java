@@ -60,7 +60,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         simButtons = root.findViewById(R.id.sim_buttons);
         for (String[] m : SIM_MODES) {
             TextView p = (TextView) inflater.inflate(R.layout.item_pill, simButtons, false);
-            p.setTextSize(14);
+            p.setTextSize(16);
             p.setPadding(Ui.dp(requireContext(), 12), 0, Ui.dp(requireContext(), 12), 0);
             p.setText(m[1]);
             p.setTag(m[0]);
@@ -132,8 +132,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Ui.pill(p, p.getTag().equals(s.simMode), 10);
         }
         if (sendOut.isChecked() != s.sendOut) sendOut.setChecked(s.sendOut);
-        simTitle.setText(s.phoneMode ? "폰 센서 · 폰을 오른 아래팔에 길게 대고 움직이세요"
-                : "사용자 움직임 흉내 · 목업 전용 (실제 제품에서는 센서값)");
+        simTitle.setText(s.phoneMode ? "폰 센서 · 폰을 오른 아래팔에 대고 움직이세요"
+                : "사용자 움직임 흉내 · 시험용");
 
         // 허브 구성이 바뀔 때만 행을 새로 만든다(슬라이더를 끄는 중에 사라지지 않게)
         StringBuilder sig = new StringBuilder();
@@ -165,8 +165,9 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Long el = s.badMs.get(a.id);
             float sec = Math.min(1.5f, (el != null ? el : 0) / 1000f);
 
-            r.state.setText(pose ? (over ? "기준 넘음" : "대기")
-                    : (bad ? String.format(Locale.US, "이탈 %.1f/1.5초", sec) : "바른 자세"));
+            // 색만으로 말하지 않게 기호를 붙인다(● 발동 / ✓ 정상 / ⚠ 경고)
+            r.state.setText(pose ? (over ? "● 기준 넘음" : "대기")
+                    : (bad ? String.format(Locale.US, "⚠ 이탈 %.1f/1.5초", sec) : "✓ 바른 자세"));
             r.state.setTextColor(over ? Ui.PRIMARY_DARK : (bad ? Ui.WARN_DARK : (pose ? Ui.MUTED : Ui.OK_DARK)));
             Ui.bar(r.bar, v, pose ? (over ? Ui.PRIMARY : Ui.PRIMARY_PALE) : (bad ? Ui.WARN : Ui.OK));
             r.sim.setText(v + "% · 기준 " + a.sens + "%");
@@ -196,6 +197,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                 type.setVisibility(View.GONE);
                 view.findViewById(R.id.live_track).setVisibility(View.GONE);
                 r.sim.setText("C 목록에서 동작을 넣으세요");
+                r.state.setVisibility(View.GONE);
                 view.setClickable(false);
             } else {
                 final AppState.Motion a = r.motion;
@@ -220,7 +222,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         box.setPadding(0, Ui.dp(requireContext(), 10), 0, 0);
         TextView title = new TextView(requireContext());
         title.setText("슬롯 " + (slot + 1) + " · " + a.name + " (" + AppState.typeName(a.type) + ")");
-        title.setTextSize(14);
+        title.setTextSize(16);
         title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(Ui.INK);
         box.addView(title);

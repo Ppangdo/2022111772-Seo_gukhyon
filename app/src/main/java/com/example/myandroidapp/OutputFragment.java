@@ -24,8 +24,8 @@ public class OutputFragment extends Fragment {
 
     private void bind(View row, String name, String desc, String state, boolean active) {
         row.setBackground(active
-                ? Ui.round(requireContext(), Ui.WHITE, 0xFFE1E5EB, 1, 12)
-                : Ui.round(requireContext(), Ui.WHITE, 0xFFC3CAD6, 1, 12));
+                ? Ui.round(requireContext(), Ui.SURFACE, Ui.LINE, 1, 12)
+                : Ui.round(requireContext(), Ui.SURFACE, Ui.BTN_LINE, 1, 12));
         ((TextView) row.findViewById(R.id.out_name)).setText(name);
         ((TextView) row.findViewById(R.id.out_desc)).setText(desc);
         TextView st = row.findViewById(R.id.out_state);

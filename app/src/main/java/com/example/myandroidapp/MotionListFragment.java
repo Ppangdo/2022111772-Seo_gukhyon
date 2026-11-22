@@ -179,9 +179,9 @@ public class MotionListFragment extends Fragment implements AppState.Listener {
 
     private void styleSlot(View v, AppState.Motion a, boolean picking, boolean over) {
         if (over) v.setBackground(Ui.round(requireContext(), Ui.PRIMARY_SOFT, Ui.PRIMARY, 2, 12));
-        else if (picking) v.setBackground(Ui.round(requireContext(), 0xFFF7F9FE, Ui.PRIMARY, 2, 12));
-        else if (a != null) v.setBackground(Ui.round(requireContext(), Ui.WHITE, 0xFFDCE1E8, 1, 12));
-        else v.setBackground(Ui.round(requireContext(), Ui.SURFACE2, 0xFFC3CAD6, 1, 12));
+        else if (picking) v.setBackground(Ui.round(requireContext(), Ui.PRIMARY_SOFT, Ui.PRIMARY, 2, 12));
+        else if (a != null) v.setBackground(Ui.round(requireContext(), Ui.SURFACE, Ui.LINE, 1, 12));
+        else v.setBackground(Ui.round(requireContext(), Ui.SURFACE2, Ui.BTN_LINE, 1, 12));
     }
 
     // 시트 안의 슬롯 상세
@@ -192,7 +192,7 @@ public class MotionListFragment extends Fragment implements AppState.Listener {
             return;
         }
         View v = slotDetail;
-        v.setBackground(Ui.round(requireContext(), Ui.WHITE, 0xFFDCE1E8, 1, 12));
+        v.setBackground(Ui.round(requireContext(), Ui.SURFACE, Ui.LINE, 1, 12));
         ((TextView) v.findViewById(R.id.slot_num)).setText("슬롯 " + (slot + 1));
         Ui.typeBadge(v.findViewById(R.id.slot_type), a.type);
         ((TextView) v.findViewById(R.id.slot_name)).setText(a.name);
