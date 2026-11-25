@@ -224,6 +224,8 @@ public class AppState {
     private float measureSum;
     private int measureCnt;
     private float recPeakArm, recPeakLean;
+    // 폰 센서 모드·기준 자세는 앱을 다시 켜도 남도록 저장한다(시연 직전에 앱이 꺼져도 다시 재지 않게)
+    private final android.content.SharedPreferences prefs;
 
     public String note = "";
 
@@ -231,6 +233,13 @@ public class AppState {
         db = new MotionDbHelper(context);
         feedback = new Feedback(context);
         hasPhoneSensor = SensorService.available(context);
+        prefs = context.getSharedPreferences("cw_phone", Context.MODE_PRIVATE);
+        phoneMode = hasPhoneSensor && prefs.getBoolean("phone_mode", false);
+        if (prefs.getBoolean("measured_by_phone", false)) {
+            tilt0 = prefs.getFloat("tilt0", -1);
+            measuredByPhone = tilt0 >= 0;
+            measuredAt = prefs.getString("measured_at", measuredAt);
+        }
         nodes.add(new Node("01", "chest", 82, "good", true));
         nodes.add(new Node("02", "rua", 74, "good", false));
         nodes.add(new Node("03", "rla", 15, "good", false));
@@ -378,13 +387,14 @@ public class AppState {
             return;
         }
         phoneMode = on;
+        prefs.edit().putBoolean("phone_mode", on).apply();
         if (!on) phoneTilt = -1;
         if ("D".equals(tab)) {
             simMode = on ? "phone" : "idle";
             busyT = 0;
         }
         if (on && !measuredByPhone) {
-            note = "폰 센서 모드: 폰을 오른 아래팔에 길게 대세요. A 탭에서 기준 자세를 측정하면 그 방향이 0°가 됩니다.";
+            note = "폰 센서 모드: 폰을 오른 아래팔에 길게 대고 \"기준 잡기\"를 누르세요. 그 방향이 0°가 됩니다.";
         }
         changed();
     }
@@ -435,9 +445,19 @@ public class AppState {
         changed();
     }
 
+    public boolean measuring() {
+        return "count".equals(measure) || "measure".equals(measure);
+    }
+
+    // 화면이 꺼지면 센서·녹화·판정이 멈추므로, 이럴 때는 화면을 켜 둔다
+    public boolean keepScreenOn() {
+        return phoneMode || "D".equals(tab) || !"idle".equals(recPhase) || measuring();
+    }
+
     public void startMeasure() {
-        if ("count".equals(measure) || "measure".equals(measure)) return;
-        measureStep(3);
+        if (measuring()) return;
+        // 폰 센서 모드는 누른 뒤 폰을 팔에 대고 팔을 내릴 시간이 필요해서 5초
+        measureStep(phoneMode ? 5 : 3);
     }
 
     private void measureStep(final int n) {
@@ -462,6 +482,8 @@ public class AppState {
                 if (phoneMode && measureCnt > 0) {
                     tilt0 = measureSum / measureCnt;
                     measuredByPhone = true;
+                    prefs.edit().putBoolean("measured_by_phone", true).putFloat("tilt0", tilt0)
+                            .putString("measured_at", measuredAt).apply();
                     note = "폰 센서로 기준 자세를 저장했습니다(" + measureCnt + "개 값 평균). 이 방향이 0°입니다.";
                 } else if (phoneMode) {
                     note = "센서 값이 들어오지 않아 기준 자세를 저장하지 못했습니다.";

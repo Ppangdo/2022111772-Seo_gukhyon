@@ -42,7 +42,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
     private BodyView body;
     private BottomSheetBehavior<View> sheet;
     private NestedScrollView sheetScroll;
-    private TextView readout, logEmpty, lastFire, logCount, simTitle;
+    private TextView readout, logEmpty, lastFire, logCount, simTitle, btnBaseline;
     private LinearLayout simButtons, liveBox, sensList, logBox;
     private CheckBox sendOut;
     private final LiveRow[] rows = new LiveRow[3];
@@ -57,6 +57,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         body.setup(s, "D", null);
 
         simTitle = root.findViewById(R.id.sim_title);
+        btnBaseline = root.findViewById(R.id.btn_baseline);
+        btnBaseline.setOnClickListener(v -> s.startMeasure());
         simButtons = root.findViewById(R.id.sim_buttons);
         for (String[] m : SIM_MODES) {
             TextView p = (TextView) inflater.inflate(R.layout.item_pill, simButtons, false);
@@ -72,7 +74,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                     return;
                 }
                 if ("phone".equals(mode) && !s.phoneMode && !s.measuredByPhone) {
-                    Toast.makeText(requireContext(), "폰을 오른 아래팔에 길게 대세요. 지금 방향을 기준(0°)으로 씁니다. A 탭에서 기준 자세를 측정하면 더 정확합니다.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "폰을 팔에 대고 \"기준 잡기\"를 누르세요", Toast.LENGTH_LONG).show();
                 }
                 s.setSimMode(mode);
             });
@@ -132,8 +134,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Ui.pill(p, p.getTag().equals(s.simMode), 10);
         }
         if (sendOut.isChecked() != s.sendOut) sendOut.setChecked(s.sendOut);
-        simTitle.setText(s.phoneMode ? "폰 센서 · 폰을 오른 아래팔에 대고 움직이세요"
-                : "사용자 움직임 흉내 · 시험용");
+        bindBaseline();
 
         // 허브 구성이 바뀔 때만 행을 새로 만든다(슬라이더를 끄는 중에 사라지지 않게)
         StringBuilder sig = new StringBuilder();
@@ -148,6 +149,34 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         bindLastFire();
         bindLog();
         onTick();
+    }
+
+    // 폰 센서 모드: 기준 상태 한 줄 + 기준 잡기 버튼(카운트다운·측정 중에는 진행 표시)
+    private void bindBaseline() {
+        btnBaseline.setVisibility(s.phoneMode ? View.VISIBLE : View.GONE);
+        if (!s.phoneMode) {
+            simTitle.setText("사용자 움직임 흉내 · 시험용");
+            simTitle.setTextColor(Ui.MUTED);
+            return;
+        }
+        if ("count".equals(s.measure)) {
+            simTitle.setText("팔을 편하게 내리세요 · " + s.measureN + "초 뒤 측정");
+            simTitle.setTextColor(Ui.PRIMARY_DARK);
+            btnBaseline.setText(s.measureN + "초");
+        } else if ("measure".equals(s.measure)) {
+            simTitle.setText("그대로 2초 유지하세요");
+            simTitle.setTextColor(Ui.PRIMARY_DARK);
+            btnBaseline.setText("측정 중");
+        } else if (s.measuredByPhone) {
+            simTitle.setText("✓ 폰 센서 · 기준 " + s.measuredAt);
+            simTitle.setTextColor(Ui.OK_DARK);
+            btnBaseline.setText("다시 잡기");
+        } else {
+            simTitle.setText("⚠ 폰 센서 · 기준 자세를 먼저 잡으세요");
+            simTitle.setTextColor(Ui.WARN_DARK);
+            btnBaseline.setText("기준 잡기");
+        }
+        Ui.enable(btnBaseline, !s.measuring());
     }
 
     @Override

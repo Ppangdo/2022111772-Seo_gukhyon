@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements AppState.Listener
         chipMode.setTextColor(ContextCompat.getColor(this, R.color.cw_ink));
         chipMode.setContentDescription((s.phoneMode ? "폰 센서 모드" : "시뮬레이션 모드") + ", 눌러서 바꾸기");
         syncSensor();
+        if (s.keepScreenOn()) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!s.tab.equals(shownTab)) showTab(s.tab);
     }
 
