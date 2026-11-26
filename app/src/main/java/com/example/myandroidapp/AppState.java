@@ -224,6 +224,10 @@ public class AppState {
     private float measureSum;
     private int measureCnt;
     private float recPeakArm, recPeakLean;
+    // D 테스트에서 끈 허브 동작(동작 id). 꺼진 동작은 판정·발동하지 않는다. 앱을 다시 켜도 유지
+    private final java.util.Set<Long> disabled = new java.util.HashSet<>();
+    // 폰 센서 모드·기준 자세는 앱을 다시 켜도 남도록 저장한다(시연 직전에 앱이 꺼져도 다시 재지 않게)
+    private final android.content.SharedPreferences prefs;
 
     public String note = "";
 
@@ -231,6 +235,19 @@ public class AppState {
         db = new MotionDbHelper(context);
         feedback = new Feedback(context);
         hasPhoneSensor = SensorService.available(context);
+        prefs = context.getSharedPreferences("cw_phone", Context.MODE_PRIVATE);
+        phoneMode = hasPhoneSensor && prefs.getBoolean("phone_mode", false);
+        for (String id : prefs.getStringSet("disabled_motions", new java.util.HashSet<>())) {
+            try {
+                disabled.add(Long.parseLong(id));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (prefs.getBoolean("measured_by_phone", false)) {
+            tilt0 = prefs.getFloat("tilt0", -1);
+            measuredByPhone = tilt0 >= 0;
+            measuredAt = prefs.getString("measured_at", measuredAt);
+        }
         nodes.add(new Node("01", "chest", 82, "good", true));
         nodes.add(new Node("02", "rua", 74, "good", false));
         nodes.add(new Node("03", "rla", 15, "good", false));
@@ -378,13 +395,14 @@ public class AppState {
             return;
         }
         phoneMode = on;
+        prefs.edit().putBoolean("phone_mode", on).apply();
         if (!on) phoneTilt = -1;
         if ("D".equals(tab)) {
             simMode = on ? "phone" : "idle";
             busyT = 0;
         }
         if (on && !measuredByPhone) {
-            note = "폰 센서 모드: 폰을 오른 아래팔에 길게 대세요. A 탭에서 기준 자세를 측정하면 그 방향이 0°가 됩니다.";
+            note = "폰 센서 모드: 폰을 오른 아래팔에 길게 대고 \"기준 잡기\"를 누르세요. 그 방향이 0°가 됩니다.";
         }
         changed();
     }
@@ -417,7 +435,7 @@ public class AppState {
     }
 
     public String readout() {
-        return "오른팔 " + Math.round(armR) + "° · 상체 앞 기울기 " + Math.round(lean * 35) + "°";
+        return "오른팔 " + Math.round(armR) + "° · 숙임 " + Math.round(lean * 35) + "°";
     }
 
     // ---------- A. 노드 설정·보정 ----------
@@ -435,9 +453,19 @@ public class AppState {
         changed();
     }
 
+    public boolean measuring() {
+        return "count".equals(measure) || "measure".equals(measure);
+    }
+
+    // 화면이 꺼지면 센서·녹화·판정이 멈추므로, 이럴 때는 화면을 켜 둔다
+    public boolean keepScreenOn() {
+        return phoneMode || "D".equals(tab) || !"idle".equals(recPhase) || measuring();
+    }
+
     public void startMeasure() {
-        if ("count".equals(measure) || "measure".equals(measure)) return;
-        measureStep(3);
+        if (measuring()) return;
+        // 폰 센서 모드는 누른 뒤 폰을 팔에 대고 팔을 내릴 시간이 필요해서 5초
+        measureStep(phoneMode ? 5 : 3);
     }
 
     private void measureStep(final int n) {
@@ -462,6 +490,8 @@ public class AppState {
                 if (phoneMode && measureCnt > 0) {
                     tilt0 = measureSum / measureCnt;
                     measuredByPhone = true;
+                    prefs.edit().putBoolean("measured_by_phone", true).putFloat("tilt0", tilt0)
+                            .putString("measured_at", measuredAt).apply();
                     note = "폰 센서로 기준 자세를 저장했습니다(" + measureCnt + "개 값 평균). 이 방향이 0°입니다.";
                 } else if (phoneMode) {
                     note = "센서 값이 들어오지 않아 기준 자세를 저장하지 못했습니다.";
@@ -641,10 +671,18 @@ public class AppState {
         rec.name = name;
     }
 
+    // 사용 노드를 바꾸면 지금까지 녹화한 기록은 노드 구성이 달라 비교할 수 없으므로 모두 지운다
     public void toggleRecNode(String id) {
         if (!"idle".equals(recPhase)) return;
         if (rec.nodes.contains(id)) rec.nodes.remove(id);
         else rec.nodes.add(id);
+        if (!takes.isEmpty()) {
+            int n = takes.size();
+            takes.clear();
+            takeSeq = 0;
+            replay = null;
+            note = "사용 노드를 바꿔서 녹화한 기록 " + n + "개를 지웠습니다. 바뀐 노드로 다시 녹화하세요.";
+        }
         changed();
     }
 
@@ -1018,6 +1056,22 @@ public class AppState {
         changed();
     }
 
+    public boolean isEnabled(Motion m) {
+        return !disabled.contains(m.id);
+    }
+
+    public void setEnabled(Motion m, boolean on) {
+        if (on) disabled.remove(m.id);
+        else disabled.add(m.id);
+        java.util.Set<String> ids = new java.util.HashSet<>();
+        for (Long id : disabled) ids.add(String.valueOf(id));
+        prefs.edit().putStringSet("disabled_motions", ids).apply();
+        sims.remove(m.id);
+        badSince.remove(m.id);
+        badMs.remove(m.id);
+        changed();
+    }
+
     // 슬라이더를 끄는 중에 화면을 다시 만들지 않도록 onTick 으로만 반영한다
     public void setSens(Motion m, int value) {
         m.sens = value;
@@ -1054,7 +1108,7 @@ public class AppState {
         boolean fired = false;
         for (int i = 0; i < 3; i++) {
             Motion a = hubAt(i);
-            if (a == null) continue;
+            if (a == null || !isEnabled(a)) continue; // 꺼진 동작은 판정하지 않는다
             float v;
             if ("arm".equals(a.sim)) v = 100 - Math.abs(armR - 150) * 0.55f;
             else if ("lean".equals(a.sim)) v = 100 - lean * 65;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ui.enable 이 비활성 전의 배경·글자색을 기억해 두는 태그 -->
+    <item name="cw_saved_bg" type="id" />
+    <item name="cw_saved_text" type="id" />
+</resources>

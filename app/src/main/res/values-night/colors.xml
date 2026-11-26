@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 어두운 테마(밤 병실용). 순수 검정·순수 흰색은 쓰지 않는다.
+     *_dark 는 '옅은 바탕 위 글자'라서 어두운 테마에서는 밝은 색이 된다 -->
+<resources>
+    <color name="cw_bg">#121418</color>
+    <color name="cw_surface">#1A1D24</color>
+    <color name="cw_surface2">#20242C</color>
+    <color name="cw_cell">#20242C</color>
+    <color name="cw_ink">#E8EAEE</color>
+    <color name="cw_muted">#C4CAD4</color>
+    <color name="cw_line">#2C313B</color>
+    <color name="cw_btn_line">#7A8394</color>
+    <color name="cw_track">#2C313B</color>
+    <color name="cw_neutral">#2C313B</color>
+
+    <color name="cw_primary">#3561E0</color>
+    <color name="cw_primary_text">#8FA9FF</color>
+    <color name="cw_primary_dark">#AFC2FF</color>
+    <color name="cw_primary_soft">#1E2A4A</color>
+    <color name="cw_primary_pale">#5A72B8</color>
+
+    <color name="cw_warn">#C99A1E</color>
+    <color name="cw_warn_strong">#7A4D00</color>
+    <color name="cw_warn_dark">#F2C14E</color>
+    <color name="cw_warn_deep">#FFD978</color>
+    <color name="cw_warn_soft">#3A2E0A</color>
+    <color name="cw_warn_row">#2E2508</color>
+
+    <color name="cw_ok">#227A4A</color>
+    <color name="cw_ok_dark">#8FDDB0</color>
+    <color name="cw_ok_soft">#15301F</color>
+
+    <color name="cw_rec">#C42B20</color>
+    <color name="cw_rec_soft">#3A1A18</color>
+
+    <color name="cw_hub">#3A404C</color>
+    <color name="cw_dropped">#1E2128</color>
+    <color name="cw_dropped_bar">#5A6170</color>
+
+    <color name="cw_body_fill">#2A2F38</color>
+    <color name="cw_body_corr">#2A3245</color>
+    <color name="cw_body_drop">#2A3A66</color>
+    <color name="cw_body_line">#7A8394</color>
+    <color name="cw_seat">#5A6170</color>
+    <color name="cw_seat_fill">#252A33</color>
+</resources>

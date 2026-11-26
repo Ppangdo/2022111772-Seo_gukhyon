@@ -12,7 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/cw_surface"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="16dp"
@@ -24,9 +24,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:maxLines="1"
             android:text="커맨드웨어"
             android:textColor="@color/cw_ink"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:textStyle="bold" />
 
         <TextView
@@ -40,7 +41,7 @@
             android:paddingBottom="4dp"
             android:text="허브 연결 · 노드 4"
             android:textColor="@color/cw_ok_dark"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -55,7 +56,7 @@
             android:paddingBottom="4dp"
             android:text="시뮬레이션"
             android:textColor="@color/cw_warn_dark"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -79,10 +80,14 @@
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/cw_surface"
+        app:backgroundTint="@color/cw_surface"
+        app:elevation="0dp"
         app:itemActiveIndicatorStyle="@null"
         app:itemIconTint="@color/nav_item"
         app:itemTextColor="@color/nav_item"
+        app:itemTextAppearanceActive="@style/Cw.NavText"
+        app:itemTextAppearanceInactive="@style/Cw.NavText"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav" />
 </LinearLayout>

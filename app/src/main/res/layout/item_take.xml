@@ -43,7 +43,7 @@
             android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
     </LinearLayout>
 
     <TextView
@@ -51,7 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textSize="13sp" />
+        android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -65,7 +65,7 @@
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:text="다시 보기"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/take_keep"
@@ -74,7 +74,7 @@
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:text="남기기"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/take_drop"
@@ -83,6 +83,6 @@
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:text="버리기"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>

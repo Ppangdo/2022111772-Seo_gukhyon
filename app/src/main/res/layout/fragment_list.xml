@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:minHeight="44dp"
+                android:minHeight="48dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -41,7 +41,7 @@
                         android:id="@+id/sync_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -49,14 +49,14 @@
                         style="@style/Cw.Small"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="12sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/btn_send"
                     style="@style/Cw.Btn.Primary"
                     android:layout_marginStart="8dp"
-                    android:minHeight="40dp"
+                    android:minHeight="48dp"
                     android:text="지금 보내기" />
             </LinearLayout>
 
@@ -74,7 +74,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
         <!-- 교체할 슬롯 고르기 안내 -->
@@ -94,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="@color/cw_primary_dark"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/btn_cancel_pick"
@@ -126,7 +126,7 @@
             <TextView
                 android:id="@+id/btn_new"
                 style="@style/Cw.Btn.OutlinePrimary"
-                android:minHeight="40dp"
+                android:minHeight="48dp"
                 android:text="새 동작 녹화" />
         </LinearLayout>
 
@@ -177,7 +177,7 @@
                 android:id="@+id/btn_close_sheet"
                 style="@style/Cw.Btn"
                 android:text="닫기"
-                android:textColor="@color/cw_primary" />
+                android:textColor="@color/cw_primary_text" />
         </LinearLayout>
 
         <include

@@ -10,14 +10,17 @@
         android:id="@+id/slider_label"
         android:layout_width="96dp"
         android:layout_height="wrap_content"
-        android:textSize="14sp" />
+        android:textSize="16sp" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        app:haloRadius="24dp"
         app:labelBehavior="gone"
+        app:thumbRadius="12dp"
+        app:trackHeight="6dp"
         app:tickVisible="false" />
 
     <TextView
@@ -25,5 +28,5 @@
         android:layout_width="52dp"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:textSize="14sp" />
+        android:textSize="16sp" />
 </LinearLayout>

@@ -3,4 +3,4 @@
     style="@style/Cw.Btn"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:textSize="15sp" />
+    android:textSize="16sp" />

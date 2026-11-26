@@ -59,7 +59,7 @@ public class RecordFragment extends Fragment implements AppState.Listener {
         recBox = root.findViewById(R.id.rec_box);
         recPct = root.findViewById(R.id.rec_pct);
         recBar = root.findViewById(R.id.rec_bar);
-        recBar.setBackground(Ui.round(requireContext(), 0xFFF2E3E1, 0, 0, 5));
+        recBar.setBackground(Ui.round(requireContext(), Ui.REC_SOFT, 0, 0, 5));
         summary = root.findViewById(R.id.summary);
         pendingWarn = root.findViewById(R.id.pending_warn);
         keptCount = root.findViewById(R.id.kept_count);
@@ -226,9 +226,9 @@ public class RecordFragment extends Fragment implements AppState.Listener {
         if (!recName.getText().toString().equals(s.rec.name)) recName.setText(s.rec.name);
         boolean pose = s.rec.isPose();
         typePose.setBackground(pose ? Ui.round(requireContext(), Ui.PRIMARY_SOFT, Ui.PRIMARY, 2, 12)
-                : Ui.round(requireContext(), Ui.WHITE, Ui.BTN_LINE, 1, 12));
+                : Ui.round(requireContext(), Ui.SURFACE, Ui.BTN_LINE, 1, 12));
         typeFix.setBackground(!pose ? Ui.round(requireContext(), Ui.OK_SOFT, Ui.OK, 2, 12)
-                : Ui.round(requireContext(), Ui.WHITE, Ui.BTN_LINE, 1, 12));
+                : Ui.round(requireContext(), Ui.SURFACE, Ui.BTN_LINE, 1, 12));
         bindUseNodes();
         delayValue.setText(s.rec.delay + "초");
         durValue.setText(Ui.seconds(s.rec.dur));
@@ -243,7 +243,7 @@ public class RecordFragment extends Fragment implements AppState.Listener {
         for (AppState.Node n : s.nodes) {
             if (n.seg == null) continue;
             TextView p = (TextView) inflater.inflate(R.layout.item_pill, useNodes, false);
-            p.setTextSize(14);
+            p.setTextSize(16);
             p.setText(n.id + " " + AppState.SEGN.get(n.seg));
             Ui.pill(p, s.rec.nodes.contains(n.id), 999);
             final String id = n.id;
@@ -265,7 +265,7 @@ public class RecordFragment extends Fragment implements AppState.Listener {
             boolean replaying = s.replay == t;
 
             int rowColor = replaying ? Ui.PRIMARY_SOFT : (pending ? Ui.WARN_ROW : (dropped ? Ui.DROPPED : Ui.SURFACE2));
-            row.setBackground(Ui.round(requireContext(), rowColor, 0, 0, 10));
+            row.setBackground(pending && !replaying ? Ui.warnRow(requireContext(), 10) : Ui.round(requireContext(), rowColor, 0, 0, 10));
             row.setAlpha(dropped ? 0.7f : 1f);
             ((TextView) row.findViewById(R.id.take_n)).setText("#" + t.n);
             Ui.bar(row.findViewById(R.id.take_bar), t.sim, pending ? Ui.WARN : (dropped ? Ui.DROPPED_BAR : Ui.PRIMARY));
@@ -277,7 +277,7 @@ public class RecordFragment extends Fragment implements AppState.Listener {
                 status.setTextColor(Ui.WARN_DARK);
             } else if (dropped) {
                 status.setText("버림");
-                status.setTextColor(0xFF6E7583);
+                status.setTextColor(Ui.MUTED);
             } else if (isRep) {
                 status.setText("대표 기록");
                 status.setTextColor(Ui.PRIMARY_DARK);
@@ -297,7 +297,7 @@ public class RecordFragment extends Fragment implements AppState.Listener {
             if (pending) {
                 keep.setText("남기기");
                 drop.setTextColor(Ui.WARN_DARK);
-                drop.setBackground(Ui.round(requireContext(), Ui.WHITE, Ui.WARN, 1, 10));
+                drop.setBackground(Ui.round(requireContext(), Ui.SURFACE, Ui.WARN, 1, 10));
                 keep.setOnClickListener(v -> s.setKept(t, Boolean.TRUE));
                 drop.setOnClickListener(v -> s.setKept(t, Boolean.FALSE));
             } else if (dropped) {

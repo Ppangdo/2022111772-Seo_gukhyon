@@ -35,6 +35,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         View thr, sensRow;
         LinearLayout bar;
         TextView state, sim, sensValue;
+        View card;
+        androidx.appcompat.widget.SwitchCompat onOff;
     }
 
     private AppState s;
@@ -42,7 +44,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
     private BodyView body;
     private BottomSheetBehavior<View> sheet;
     private NestedScrollView sheetScroll;
-    private TextView readout, logEmpty, lastFire, logCount, simTitle;
+    private TextView readout, logEmpty, lastFire, logCount, simTitle, btnBaseline;
     private LinearLayout simButtons, liveBox, sensList, logBox;
     private CheckBox sendOut;
     private final LiveRow[] rows = new LiveRow[3];
@@ -57,10 +59,12 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         body.setup(s, "D", null);
 
         simTitle = root.findViewById(R.id.sim_title);
+        btnBaseline = root.findViewById(R.id.btn_baseline);
+        btnBaseline.setOnClickListener(v -> s.startMeasure());
         simButtons = root.findViewById(R.id.sim_buttons);
         for (String[] m : SIM_MODES) {
             TextView p = (TextView) inflater.inflate(R.layout.item_pill, simButtons, false);
-            p.setTextSize(14);
+            p.setTextSize(16);
             p.setPadding(Ui.dp(requireContext(), 12), 0, Ui.dp(requireContext(), 12), 0);
             p.setText(m[1]);
             p.setTag(m[0]);
@@ -72,7 +76,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                     return;
                 }
                 if ("phone".equals(mode) && !s.phoneMode && !s.measuredByPhone) {
-                    Toast.makeText(requireContext(), "폰을 오른 아래팔에 길게 대세요. 지금 방향을 기준(0°)으로 씁니다. A 탭에서 기준 자세를 측정하면 더 정확합니다.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "폰을 팔에 대고 \"기준 잡기\"를 누르세요", Toast.LENGTH_LONG).show();
                 }
                 s.setSimMode(mode);
             });
@@ -132,8 +136,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Ui.pill(p, p.getTag().equals(s.simMode), 10);
         }
         if (sendOut.isChecked() != s.sendOut) sendOut.setChecked(s.sendOut);
-        simTitle.setText(s.phoneMode ? "폰 센서 · 폰을 오른 아래팔에 길게 대고 움직이세요"
-                : "사용자 움직임 흉내 · 목업 전용 (실제 제품에서는 센서값)");
+        bindBaseline();
 
         // 허브 구성이 바뀔 때만 행을 새로 만든다(슬라이더를 끄는 중에 사라지지 않게)
         StringBuilder sig = new StringBuilder();
@@ -145,9 +148,45 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             hubSignature = sig.toString();
             buildRows();
         }
+        // 시트의 켜기·끄기 스위치를 상태에 맞춘다
+        for (LiveRow r : rows) {
+            if (r == null || r.motion == null || r.onOff == null) continue;
+            boolean on = s.isEnabled(r.motion);
+            if (r.onOff.isChecked() != on) r.onOff.setChecked(on);
+            r.onOff.setText(on ? "켜짐" : "꺼짐");
+            r.card.setAlpha(on ? 1f : 0.6f);
+        }
         bindLastFire();
         bindLog();
         onTick();
+    }
+
+    // 폰 센서 모드: 기준 상태 한 줄 + 기준 잡기 버튼(카운트다운·측정 중에는 진행 표시)
+    private void bindBaseline() {
+        btnBaseline.setVisibility(s.phoneMode ? View.VISIBLE : View.GONE);
+        if (!s.phoneMode) {
+            simTitle.setText("사용자 움직임 흉내 · 시험용");
+            simTitle.setTextColor(Ui.MUTED);
+            return;
+        }
+        if ("count".equals(s.measure)) {
+            simTitle.setText("팔을 편하게 내리세요 · " + s.measureN + "초 뒤 측정");
+            simTitle.setTextColor(Ui.PRIMARY_DARK);
+            btnBaseline.setText(s.measureN + "초");
+        } else if ("measure".equals(s.measure)) {
+            simTitle.setText("그대로 2초 유지하세요");
+            simTitle.setTextColor(Ui.PRIMARY_DARK);
+            btnBaseline.setText("측정 중");
+        } else if (s.measuredByPhone) {
+            simTitle.setText("✓ 폰 센서 · 기준 " + s.measuredAt);
+            simTitle.setTextColor(Ui.OK_DARK);
+            btnBaseline.setText("다시 잡기");
+        } else {
+            simTitle.setText("⚠ 폰 센서 · 기준 자세를 먼저 잡으세요");
+            simTitle.setTextColor(Ui.WARN_DARK);
+            btnBaseline.setText("기준 잡기");
+        }
+        Ui.enable(btnBaseline, !s.measuring());
     }
 
     @Override
@@ -157,6 +196,17 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         for (LiveRow r : rows) {
             if (r == null || r.motion == null) continue;
             AppState.Motion a = r.motion;
+            if (!s.isEnabled(a)) {
+                // 꺼진 동작: 판정하지 않음. 막대를 비우고 다시 켜는 방법을 알려 준다
+                r.state.setText("○ 꺼짐 · 판정 안 함");
+                r.state.setTextColor(Ui.MUTED);
+                Ui.bar(r.bar, 0, Ui.NEUTRAL);
+                r.sim.setText("눌러서 다시 켜기");
+                r.sensValue.setText(a.sens + "%");
+                r.thr.setVisibility(View.INVISIBLE);
+                continue;
+            }
+            r.thr.setVisibility(View.VISIBLE);
             Integer value = s.sims.get(a.id);
             int v = value != null ? value : 0;
             boolean pose = a.isPose();
@@ -165,8 +215,9 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             Long el = s.badMs.get(a.id);
             float sec = Math.min(1.5f, (el != null ? el : 0) / 1000f);
 
-            r.state.setText(pose ? (over ? "기준 넘음" : "대기")
-                    : (bad ? String.format(Locale.US, "이탈 %.1f/1.5초", sec) : "바른 자세"));
+            // 색만으로 말하지 않게 기호를 붙인다(● 발동 / ✓ 정상 / ⚠ 경고)
+            r.state.setText(pose ? (over ? "● 기준 넘음" : "대기")
+                    : (bad ? String.format(Locale.US, "⚠ 이탈 %.1f/1.5초", sec) : "✓ 바른 자세"));
             r.state.setTextColor(over ? Ui.PRIMARY_DARK : (bad ? Ui.WARN_DARK : (pose ? Ui.MUTED : Ui.OK_DARK)));
             Ui.bar(r.bar, v, pose ? (over ? Ui.PRIMARY : Ui.PRIMARY_PALE) : (bad ? Ui.WARN : Ui.OK));
             r.sim.setText(v + "% · 기준 " + a.sens + "%");
@@ -196,6 +247,7 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                 type.setVisibility(View.GONE);
                 view.findViewById(R.id.live_track).setVisibility(View.GONE);
                 r.sim.setText("C 목록에서 동작을 넣으세요");
+                r.state.setVisibility(View.GONE);
                 view.setClickable(false);
             } else {
                 final AppState.Motion a = r.motion;
@@ -204,10 +256,11 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                 r.bar = view.findViewById(R.id.live_bar);
                 r.thr = view.findViewById(R.id.live_thr);
                 r.sensRow = buildSensRow(inflater, i, a, r);
-                view.setContentDescription("슬롯 " + (i + 1) + " " + a.name + ", 눌러서 민감도 바꾸기");
+                view.setContentDescription("슬롯 " + (i + 1) + " " + a.name + ", 눌러서 켜기·끄기와 민감도 바꾸기");
                 final View target = r.sensRow;
                 view.setOnClickListener(v -> openSheetAt(target));
             }
+            r.card = view;
             rows[i] = r;
             liveBox.addView(view);
         }
@@ -218,12 +271,30 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         LinearLayout box = new LinearLayout(requireContext());
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(0, Ui.dp(requireContext(), 10), 0, 0);
+        // 제목 줄: 슬롯 이름 + 켜기·끄기 스위치(끄면 이 동작은 판정·발동하지 않는다)
+        LinearLayout head = new LinearLayout(requireContext());
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
         TextView title = new TextView(requireContext());
         title.setText("슬롯 " + (slot + 1) + " · " + a.name + " (" + AppState.typeName(a.type) + ")");
-        title.setTextSize(14);
+        title.setTextSize(16);
         title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(Ui.INK);
-        box.addView(title);
+        head.addView(title, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        androidx.appcompat.widget.SwitchCompat sw = new androidx.appcompat.widget.SwitchCompat(requireContext());
+        sw.setTextSize(16);
+        sw.setSwitchPadding(Ui.dp(requireContext(), 8));
+        sw.setMinHeight(Ui.dp(requireContext(), 48));
+        sw.setChecked(s.isEnabled(a));
+        sw.setText(sw.isChecked() ? "켜짐" : "꺼짐");
+        sw.setTextColor(Ui.INK);
+        sw.setContentDescription(a.name + " 켜기·끄기");
+        sw.setOnCheckedChangeListener((b, checked) -> {
+            if (checked != s.isEnabled(a)) s.setEnabled(a, checked);
+        });
+        head.addView(sw);
+        box.addView(head);
+        r.onOff = sw;
 
         View row = inflater.inflate(R.layout.item_slider, box, false);
         ((TextView) row.findViewById(R.id.slider_label)).setText(a.isPose() ? "발동 기준" : "이탈 기준");
