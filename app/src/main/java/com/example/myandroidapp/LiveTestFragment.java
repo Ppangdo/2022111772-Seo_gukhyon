@@ -35,6 +35,8 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         View thr, sensRow;
         LinearLayout bar;
         TextView state, sim, sensValue;
+        View card;
+        androidx.appcompat.widget.SwitchCompat onOff;
     }
 
     private AppState s;
@@ -146,6 +148,14 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
             hubSignature = sig.toString();
             buildRows();
         }
+        // 시트의 켜기·끄기 스위치를 상태에 맞춘다
+        for (LiveRow r : rows) {
+            if (r == null || r.motion == null || r.onOff == null) continue;
+            boolean on = s.isEnabled(r.motion);
+            if (r.onOff.isChecked() != on) r.onOff.setChecked(on);
+            r.onOff.setText(on ? "켜짐" : "꺼짐");
+            r.card.setAlpha(on ? 1f : 0.6f);
+        }
         bindLastFire();
         bindLog();
         onTick();
@@ -186,6 +196,17 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         for (LiveRow r : rows) {
             if (r == null || r.motion == null) continue;
             AppState.Motion a = r.motion;
+            if (!s.isEnabled(a)) {
+                // 꺼진 동작: 판정하지 않음. 막대를 비우고 다시 켜는 방법을 알려 준다
+                r.state.setText("○ 꺼짐 · 판정 안 함");
+                r.state.setTextColor(Ui.MUTED);
+                Ui.bar(r.bar, 0, Ui.NEUTRAL);
+                r.sim.setText("눌러서 다시 켜기");
+                r.sensValue.setText(a.sens + "%");
+                r.thr.setVisibility(View.INVISIBLE);
+                continue;
+            }
+            r.thr.setVisibility(View.VISIBLE);
             Integer value = s.sims.get(a.id);
             int v = value != null ? value : 0;
             boolean pose = a.isPose();
@@ -235,10 +256,11 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
                 r.bar = view.findViewById(R.id.live_bar);
                 r.thr = view.findViewById(R.id.live_thr);
                 r.sensRow = buildSensRow(inflater, i, a, r);
-                view.setContentDescription("슬롯 " + (i + 1) + " " + a.name + ", 눌러서 민감도 바꾸기");
+                view.setContentDescription("슬롯 " + (i + 1) + " " + a.name + ", 눌러서 켜기·끄기와 민감도 바꾸기");
                 final View target = r.sensRow;
                 view.setOnClickListener(v -> openSheetAt(target));
             }
+            r.card = view;
             rows[i] = r;
             liveBox.addView(view);
         }
@@ -249,12 +271,30 @@ public class LiveTestFragment extends Fragment implements AppState.Listener {
         LinearLayout box = new LinearLayout(requireContext());
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(0, Ui.dp(requireContext(), 10), 0, 0);
+        // 제목 줄: 슬롯 이름 + 켜기·끄기 스위치(끄면 이 동작은 판정·발동하지 않는다)
+        LinearLayout head = new LinearLayout(requireContext());
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(android.view.Gravity.CENTER_VERTICAL);
         TextView title = new TextView(requireContext());
         title.setText("슬롯 " + (slot + 1) + " · " + a.name + " (" + AppState.typeName(a.type) + ")");
         title.setTextSize(16);
         title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(Ui.INK);
-        box.addView(title);
+        head.addView(title, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        androidx.appcompat.widget.SwitchCompat sw = new androidx.appcompat.widget.SwitchCompat(requireContext());
+        sw.setTextSize(16);
+        sw.setSwitchPadding(Ui.dp(requireContext(), 8));
+        sw.setMinHeight(Ui.dp(requireContext(), 48));
+        sw.setChecked(s.isEnabled(a));
+        sw.setText(sw.isChecked() ? "켜짐" : "꺼짐");
+        sw.setTextColor(Ui.INK);
+        sw.setContentDescription(a.name + " 켜기·끄기");
+        sw.setOnCheckedChangeListener((b, checked) -> {
+            if (checked != s.isEnabled(a)) s.setEnabled(a, checked);
+        });
+        head.addView(sw);
+        box.addView(head);
+        r.onOff = sw;
 
         View row = inflater.inflate(R.layout.item_slider, box, false);
         ((TextView) row.findViewById(R.id.slider_label)).setText(a.isPose() ? "발동 기준" : "이탈 기준");

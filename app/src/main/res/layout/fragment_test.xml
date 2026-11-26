@@ -124,7 +124,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="막대를 누르면 민감도를 바꿀 수 있습니다"
+                    android:text="막대를 누르면 켜기·끄기와 민감도를 바꿀 수 있습니다"
                     android:textSize="14sp" />
             </LinearLayout>
             </ScrollView>
@@ -195,7 +195,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="민감도 · 발동 기록" />
+                android:text="켜기·끄기 · 민감도 · 발동 기록" />
 
             <TextView
                 android:id="@+id/btn_close_sheet"
